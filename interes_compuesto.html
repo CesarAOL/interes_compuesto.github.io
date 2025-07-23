@@ -1,365 +1,57 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Detalle de Interés Compuesto</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <meta charset="UTF-8">
+  <title>Formulario de Contacto</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: Arial, sans-serif;
+      padding: 20px;
       background: #f4f4f4;
-      margin: 0;
-      padding: 2rem;
-      color: #333;
     }
-
-    h1 {
-      text-align: center;
-      color: #4CAF50;
+    form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 400px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-
-    .formulario {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
+    input, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1em;
     }
-
-    .formulario input, .formulario select {
-      padding: 0.5rem;
-      font-size: 1rem;
-      width: 180px;
-    }
-
     button {
-      padding: 0.6rem 1.2rem;
-      font-size: 1rem;
-      background-color: #4CAF50;
+      background-color: #007bff;
       color: white;
       border: none;
       cursor: pointer;
-      border-radius: 0.3rem;
     }
-
     button:hover {
-      background-color: #45a049;
-    }
-
-    .resumen {
-      margin: 1rem auto;
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: bold;
-    }
-
-    .detalle-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      justify-content: center;
-    }
-
-    .detalle-box {
-      background: white;
-      padding: 1rem;
-      border-radius: 0.5rem;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      width: 280px;
-      transition: transform 0.2s;
-    }
-
-    .detalle-box:hover {
-      transform: scale(1.02);
-    }
-
-    .detalle-box p {
-      margin: 0.2rem 0;
-    }
-
-    .detalle-box input {
-      margin-top: 0.4rem;
-      width: 100%;
-      padding: 0.4rem;
-    }
-
-    .mensaje-diferencia {
-      font-size: 0.95rem;
-      margin-top: 0.4rem;
-    }
-
-    .negativo {
-      color: red;
-    }
-
-    .positivo {
-      color: green;
-    }
-
-    .resumen-animado {
-      animation: pop 0.3s ease-in-out;
-    }
-
-    @keyframes pop {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1); }
+      background-color: #0056b3;
     }
   </style>
 </head>
 <body>
-  <h1>Detalle de Interés Compuesto</h1>
 
-  <div class="formulario">
-    <input type="number" id="capital" placeholder="Capital Inicial" />
-    <input type="number" id="interes" placeholder="Interés Diario (%)" step="0.01" />
-    <input type="number" id="meses" placeholder="Número de Meses" />
-    <select id="moneda">
-      <option value="S/">Soles (S/)</option>
-      <option value="$">Dólares ($)</option>
-    </select>
-    <button onclick="generarDetalle()">Generar Detalle</button>
-    <button onclick="exportarExcel()">Exportar Excel</button>
-  </div>
+  <h2 style="text-align: center;">Formulario de Contacto</h2>
 
-  <div class="resumen" id="resumenEstimado">Monto Final Estimado: S/ 0.00</div>
-  <div class="resumen" id="resumenReal">Monto Real Alcanzado: S/ 0.00</div>
-  <div class="resumen" id="contadorResultados">Meses Positivos: 0 | Meses Negativos: 0</div>
+  <form>
+    <label for="nombre">Nombre:</label>
+    <input type="text" id="nombre" name="nombre" required>
 
-  <div class="detalle-container" id="detalleContainer"></div>
+    <label for="correo">Correo Electrónico:</label>
+    <input type="email" id="correo" name="correo" required>
 
-  <script>
-    const STORAGE_KEY = "detalle_interes_compuesto_v2";
+    <label for="mensaje">Mensaje:</label>
+    <textarea id="mensaje" name="mensaje" rows="4" required></textarea>
 
-    function formatoMoneda(valor, simbolo) {
-      return `${simbolo} ${valor.toFixed(2)}`;
-    }
+    <button type="submit">Enviar</button>
+  </form>
 
-    function generarDetalle() {
-      localStorage.removeItem(STORAGE_KEY);
-
-      const capital = parseFloat(document.getElementById('capital').value);
-      const interesDiario = parseFloat(document.getElementById('interes').value) / 100;
-      const meses = parseInt(document.getElementById('meses').value);
-      const simbolo = document.getElementById('moneda').value;
-
-      if (isNaN(capital) || isNaN(interesDiario) || isNaN(meses)) {
-        alert('Por favor completa todos los campos.');
-        return;
-      }
-
-      const detalleContainer = document.getElementById('detalleContainer');
-      detalleContainer.innerHTML = '';
-
-      let saldo = capital;
-      const dias = 30;
-      let inputsData = [];
-
-      for (let i = 0; i < meses; i++) {
-        const interesMensual = saldo * interesDiario * dias;
-        const estimado = saldo + interesMensual;
-
-        const box = document.createElement('div');
-        box.className = 'detalle-box';
-
-        box.innerHTML = `
-          <h3>Mes ${i + 1}</h3>
-          <p>Saldo Inicial: ${formatoMoneda(saldo, simbolo)}</p>
-          <p>Interés: ${formatoMoneda(interesMensual, simbolo)}</p>
-          <p>Estimado: ${formatoMoneda(estimado, simbolo)}</p>
-          <input type="number" placeholder="Monto Real a Poner" data-indice="${i}" data-estimado="${estimado}" />
-          <div class="mensaje-diferencia"></div>
-        `;
-
-        detalleContainer.appendChild(box);
-
-        inputsData.push({ estimado, valor: '', diferencia: '', clase: '' });
-        saldo = estimado;
-      }
-
-      document.getElementById('resumenEstimado').textContent = `Monto Final Estimado: ${formatoMoneda(saldo, simbolo)}`;
-      document.getElementById('resumenReal').textContent = `Monto Real Alcanzado: ${formatoMoneda(0, simbolo)}`;
-      document.getElementById('contadorResultados').textContent = `Meses Positivos: 0 | Meses Negativos: 0`;
-
-      const inputs = document.querySelectorAll('input[data-estimado]');
-      inputs.forEach(input => {
-        input.addEventListener('input', () => actualizarDiferencia(input));
-      });
-
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ capital, interes: interesDiario * 100, meses, simbolo, inputsData }));
-    }
-
-    function actualizarDiferencia(input) {
-      const datos = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      const inputs = document.querySelectorAll('input[data-estimado]');
-      const detalleBoxes = document.querySelectorAll('.detalle-box');
-      const interesDiario = parseFloat(document.getElementById('interes').value) / 100;
-      const dias = 30;
-      const simbolo = document.getElementById('moneda').value;
-      let saldo = parseFloat(document.getElementById('capital').value);
-
-      for (let i = 0; i < inputs.length; i++) {
-        const box = detalleBoxes[i];
-        const inputReal = box.querySelector('input');
-        const mensaje = box.querySelector('.mensaje-diferencia');
-
-        if (i > 0) {
-          const anteriorReal = parseFloat(detalleBoxes[i - 1].querySelector('input').value);
-          if (!isNaN(anteriorReal)) saldo = anteriorReal;
-        }
-
-        const interesMensual = saldo * interesDiario * dias;
-        const estimado = saldo + interesMensual;
-
-        box.querySelector('p:nth-child(2)').textContent = `Saldo Inicial: ${formatoMoneda(saldo, simbolo)}`;
-        box.querySelector('p:nth-child(3)').textContent = `Interés: ${formatoMoneda(interesMensual, simbolo)}`;
-        box.querySelector('p:nth-child(4)').textContent = `Estimado: ${formatoMoneda(estimado, simbolo)}`;
-        inputReal.setAttribute('data-estimado', estimado);
-
-        const real = parseFloat(inputReal.value);
-        if (!isNaN(real)) {
-          const diferencia = real - estimado;
-          const porcentaje = (diferencia / estimado) * 100;
-          const clase = diferencia < 0 ? 'negativo' : 'positivo';
-          mensaje.textContent = `Diferencia: ${formatoMoneda(diferencia, simbolo)} (${porcentaje.toFixed(1)}%)`;
-          mensaje.className = `mensaje-diferencia ${clase}`;
-          datos.inputsData[i] = { estimado, valor: real, diferencia, clase };
-        } else {
-          mensaje.textContent = '';
-          datos.inputsData[i] = { estimado, valor: '', diferencia: '', clase: '' };
-        }
-
-        saldo = estimado;
-      }
-
-      let ultimoReal = 0;
-      for (let i = inputs.length - 1; i >= 0; i--) {
-        const val = parseFloat(inputs[i].value);
-        if (!isNaN(val)) {
-          ultimoReal = val;
-          break;
-        }
-      }
-
-      document.getElementById('resumenReal').textContent = `Monto Real Alcanzado: ${formatoMoneda(ultimoReal, simbolo)}`;
-      document.getElementById('resumenReal').classList.add('resumen-animado');
-      setTimeout(() => document.getElementById('resumenReal').classList.remove('resumen-animado'), 800);
-
-      let positivos = 0, negativos = 0;
-      inputs.forEach((inp) => {
-        const est = parseFloat(inp.getAttribute('data-estimado'));
-        const val = parseFloat(inp.value);
-        if (!isNaN(val)) {
-          if (val >= est) positivos++;
-          else negativos++;
-        }
-      });
-
-      document.getElementById('contadorResultados').textContent = `Meses Positivos: ${positivos} | Meses Negativos: ${negativos}`;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(datos));
-    }
-
-    function exportarExcel() {
-      const datos = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      if (!datos) {
-        alert("No hay datos para exportar.");
-        return;
-      }
-
-      const detalleBoxes = document.querySelectorAll('.detalle-box');
-      const simbolo = datos.simbolo;
-      const filas = [
-        ["Mes", "Saldo Inicial", "Interés", "Estimado", "Real", "Diferencia", "Porcentaje"]
-      ];
-
-      detalleBoxes.forEach((box, i) => {
-        const saldoInicial = parseFloat(box.querySelector('p:nth-child(2)').textContent.split(": ")[1].replace(simbolo, "").trim());
-        const interes = parseFloat(box.querySelector('p:nth-child(3)').textContent.split(": ")[1].replace(simbolo, "").trim());
-        const estimado = parseFloat(box.querySelector('p:nth-child(4)').textContent.split(": ")[1].replace(simbolo, "").trim());
-        const realInput = box.querySelector('input').value;
-        const real = realInput ? parseFloat(realInput) : null;
-
-        let diferencia = "", porcentaje = "";
-        if (real !== null) {
-          diferencia = real - estimado;
-          porcentaje = (diferencia / estimado) || 0;
-        }
-
-        filas.push([
-          `Mes ${i + 1}`,
-          saldoInicial,
-          interes,
-          estimado,
-          real !== null ? real : "",
-          diferencia !== "" ? diferencia : "",
-          porcentaje !== "" ? porcentaje : ""
-        ]);
-      });
-
-      const ws = XLSX.utils.aoa_to_sheet(filas);
-
-      const currencyFormat = '"'+simbolo+'" #,##0.00';
-      const percentFormat = '0.0%';
-
-      const range = XLSX.utils.decode_range(ws['!ref']);
-      for (let C = range.s.c + 1; C <= range.e.c; ++C) {
-        for (let R = range.s.r + 1; R <= range.e.r; ++R) {
-          const cell_address = { c: C, r: R };
-          const cell_ref = XLSX.utils.encode_cell(cell_address);
-          const cell = ws[cell_ref];
-          if (!cell) continue;
-
-          if ([1,2,3,4,5].includes(C)) {
-            cell.z = currencyFormat;
-            cell.t = "n";
-          } else if (C === 6) {
-            cell.z = percentFormat;
-            cell.t = "n";
-          }
-        }
-      }
-
-      for (let C = 0; C <= 6; C++) {
-        const cell_ref = XLSX.utils.encode_cell({ c: C, r: 0 });
-        if (ws[cell_ref]) {
-          ws[cell_ref].s = { font: { bold: true } };
-        }
-      }
-
-      ws['!cols'] = [
-        { wch: 10 },
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 12 }
-      ];
-
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Detalle");
-      XLSX.writeFile(wb, "detalle_interes_compuesto.xlsx");
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const datos = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      if (datos) {
-        document.getElementById('capital').value = datos.capital;
-        document.getElementById('interes').value = datos.interes;
-        document.getElementById('meses').value = datos.meses;
-        document.getElementById('moneda').value = datos.simbolo;
-        generarDetalle();
-
-        const inputs = document.querySelectorAll('input[data-estimado]');
-        datos.inputsData.forEach((d, i) => {
-          inputs[i].value = d.valor;
-        });
-        inputs.forEach(input => {
-          input.dispatchEvent(new Event('input'));
-        });
-      }
-    });
-  </script>
 </body>
 </html>
