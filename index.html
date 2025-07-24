@@ -362,4 +362,289 @@
     });
   </script>
 </body>
+  <!-- Botón flotante -->
+<button id="btnFlotante" title="Calculadora de Apalancamiento">📈</button>
+
+<!-- Panel lateral con campos flotantes -->
+<div id="panelCalculadora">
+  <div id="cerrarPanel">✖</div>
+  <h2>Calculadora Apalancamiento</h2>
+
+  <div class="campo-flotante">
+  <select id="tipoOperacion" required>
+    <option disabled selected value="">Selecciona tipo de operación</option>
+    <option value="long">📈 Long (sube)</option>
+    <option value="short">📉 Short (baja)</option>
+  </select>
+</div>
+  <div class="campo-flotante">
+    <input type="number" id="precioEntrada" required placeholder=" " />
+    <label for="precioEntrada">Precio de entrada ($)</label>
+  </div>
+
+  <div class="campo-flotante">
+    <input type="number" id="montoInvertido" required placeholder=" " />
+    <label for="montoInvertido">Monto invertido ($)</label>
+  </div>
+
+  <div class="campo-flotante">
+    <input type="number" id="apalancamiento" required placeholder=" " />
+    <label for="apalancamiento">Apalancamiento (x)</label>
+  </div>
+
+  <div class="campo-flotante">
+    <input type="number" id="gananciaDeseada" required placeholder=" " />
+    <label for="gananciaDeseada">Ganancia deseada ($)</label>
+  </div>
+
+  <button onclick="calcularSalida()">Calcular</button>
+
+  <div id="resultadoApalancamiento"></div>
+</div>
+
+<!-- ESTILOS -->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+  :root {
+    --color-principal: #0d47a1;
+    --color-verde: #00c853;
+    --color-rojo: #d50000;
+    --color-panel: #121212;
+    --color-texto: #ffffff;
+    --color-input: #1e1e1e;
+    --borde-input: #444;
+    --sombra-suave: 0 6px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  #btnFlotante {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    background: var(--color-principal);
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: 50%;
+    font-size: 1.6rem;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--sombra-suave);
+    transition: all 0.3s ease;
+  }
+
+  #btnFlotante:hover {
+    transform: scale(1.08);
+    background: #1565c0;
+  }
+
+  #panelCalculadora {
+    position: fixed;
+    top: 0;
+    right: -280px; /* actualizado */
+    width: 280px;
+    height: 100%;
+    background: var(--color-panel);
+    color: var(--color-texto);
+    box-shadow: var(--sombra-suave);
+    padding: 1.5rem 1rem;
+    transition: right 0.4s ease;
+    z-index: 998;
+    backdrop-filter: blur(8px);
+    font-family: 'Roboto', sans-serif;
+    overflow-y: auto;
+    border-left: 2px solid #1e1e1e;
+    border-radius: 12px 0 0 12px;
+  }
+
+  #panelCalculadora h2 {
+    margin-top: 0;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    color: #ffffff;
+    border-bottom: 1px solid #333;
+    padding-bottom: 0.4rem;
+  }
+
+  .campo-flotante {
+    position: relative;
+    margin-bottom: 1.3rem;
+  }
+
+  .campo-flotante input,
+  .campo-flotante select {
+    width: 100%;
+    padding: 0.8rem 0.6rem;
+    font-size: 0.95rem;
+    background: var(--color-input);
+    border: 1px solid var(--borde-input);
+    color: white;
+    border-radius: 5px;
+    outline: none;
+    font-family: 'Roboto', sans-serif;
+  }
+
+  .campo-flotante label {
+    position: absolute;
+    top: 50%;
+    left: 0.6rem;
+    transform: translateY(-50%);
+    font-size: 0.9rem;
+    color: #aaa;
+    pointer-events: none;
+    transition: 0.2s ease all;
+    background-color: transparent;
+  }
+
+  .campo-flotante input:focus + label,
+  .campo-flotante input:not(:placeholder-shown) + label,
+  .campo-flotante select:focus + label,
+  .campo-flotante select:valid + label {
+    top: -0.6rem;
+    left: 0.5rem;
+    background-color: var(--color-panel);
+    padding: 0 0.3rem;
+    font-size: 0.7rem;
+    color: #aaa;
+  }
+
+  #panelCalculadora button {
+    background-color: var(--color-principal);
+    border: none;
+    color: white;
+    padding: 0.6rem;
+    width: 100%;
+    font-size: 1rem;
+    margin-top: 0.3rem;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.3s ease;
+  }
+
+  #panelCalculadora button:hover {
+    background-color: #1976d2;
+  }
+
+  #cerrarPanel {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #888;
+    transition: color 0.3s;
+  }
+
+  #cerrarPanel:hover {
+    color: #fff;
+  }
+
+  #resultadoApalancamiento {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    font-weight: bold;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.4s ease;
+    font-size: 0.95rem;
+    font-family: 'Roboto', sans-serif;
+  }
+
+  #resultadoApalancamiento.mostrar {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .positivo {
+    background-color: #1b5e20;
+    color: #c8e6c9;
+    border: 1px solid #388e3c;
+  }
+
+  .negativo {
+    background-color: #b71c1c;
+    color: #ffcdd2;
+    border: 1px solid #e53935;
+  }
+
+  .mensaje-error {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+    font-weight: normal;
+  }
+</style>
+
+<!-- SCRIPTS -->
+<script>
+  const btnFlotante = document.getElementById('btnFlotante');
+  const panel = document.getElementById('panelCalculadora');
+  const cerrar = document.getElementById('cerrarPanel');
+  const resultado = document.getElementById('resultadoApalancamiento');
+
+  btnFlotante.onclick = () => {
+    panel.style.right = '0'; // Pegado al borde derecho
+    document.addEventListener('click', cerrarPorClickFuera);
+  };
+
+  cerrar.onclick = cerrarPanel;
+
+  function cerrarPanel() {
+    panel.style.right = '-280px'; // se oculta
+    resultado.innerHTML = '';
+    resultado.className = '';
+    resultado.classList.remove('mostrar');
+    document.removeEventListener('click', cerrarPorClickFuera);
+    limpiarCampos();
+  }
+
+  function cerrarPorClickFuera(event) {
+    if (!panel.contains(event.target) && event.target !== btnFlotante) {
+      cerrarPanel();
+    }
+  }
+
+  function limpiarCampos() {
+    document.getElementById('precioEntrada').value = '';
+    document.getElementById('montoInvertido').value = '';
+    document.getElementById('apalancamiento').value = '';
+    document.getElementById('gananciaDeseada').value = '';
+    document.getElementById('tipoOperacion').value = 'long';
+  }
+
+  function calcularSalida() {
+    const tipo = document.getElementById('tipoOperacion').value;
+    const entrada = parseFloat(document.getElementById('precioEntrada').value);
+    const monto = parseFloat(document.getElementById('montoInvertido').value);
+    const apalancamiento = parseFloat(document.getElementById('apalancamiento').value);
+    const ganancia = parseFloat(document.getElementById('gananciaDeseada').value);
+
+    if (isNaN(entrada) || isNaN(monto) || isNaN(apalancamiento) || isNaN(ganancia)) {
+      resultado.innerHTML = "⚠️ Completa todos los campos correctamente.";
+      resultado.className = "mensaje-error mostrar";
+      return;
+    }
+
+    const posicion = monto * apalancamiento;
+    const variacion = (ganancia / posicion) * entrada;
+    const salida = tipo === "long" ? entrada + variacion : entrada - variacion;
+    const roi = (ganancia / monto) * 100;
+
+    resultado.innerHTML = `
+      Tipo: <strong>${tipo === "long" ? "Largo 📈" : "Corto 📉"}</strong><br>
+      Precio de salida:<br><strong>$${salida.toFixed(2)}</strong><br>
+      ROI sobre capital:<br><strong>${roi.toFixed(2)}%</strong>
+    `;
+
+    resultado.className = `mostrar ${roi >= 0 ? 'positivo' : 'negativo'}`;
+  }
+</script>
+
 </html>
