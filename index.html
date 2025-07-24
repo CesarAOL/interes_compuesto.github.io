@@ -106,7 +106,27 @@
       50% { transform: scale(1.1); }
       100% { transform: scale(1); }
     }
-  </style>
+  
+  .mensaje-diferencia {
+    font-size: 0.95rem;
+    margin-top: 0.4rem;
+    padding: 0.4rem;
+    border-radius: 4px;
+  }
+
+  .mensaje-diferencia.positivo {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #66bb6a;
+  }
+
+  .mensaje-diferencia.negativo {
+    background-color: #ffebee;
+    color: #c62828;
+    border: 1px solid #ef9a9a;
+  }
+
+</style>
 </head>
 <body>
   <h1>Detalle de Interés Compuesto</h1>
