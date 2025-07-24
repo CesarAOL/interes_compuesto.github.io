@@ -247,7 +247,9 @@
           datos.inputsData[i] = { estimado, valor: real, diferencia, clase };
         } else {
           mensaje.textContent = '';
-          datos.inputsData[i] = { estimado, valor: '', diferencia: '', clase: '' };
+mensaje.className = 'mensaje-diferencia'; // ← elimina clases de color
+datos.inputsData[i] = { estimado, valor: '', diferencia: '', clase: '' };
+
         }
 
         saldo = estimado;
