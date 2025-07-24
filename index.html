@@ -371,12 +371,12 @@
   <h2>Calculadora Apalancamiento</h2>
 
   <div class="campo-flotante">
-  <select id="tipoOperacion" required>
-    <option disabled selected value="">Selecciona tipo de operación</option>
-    <option value="long">📈 Long (sube)</option>
-    <option value="short">📉 Short (baja)</option>
-  </select>
-</div>
+    <select id="tipoOperacion" required>
+      <option value="long">📈 Long (sube)</option>
+      <option value="short">📉 Short (baja)</option>
+    </select>
+  </div>
+
   <div class="campo-flotante">
     <input type="number" id="precioEntrada" required placeholder=" " />
     <label for="precioEntrada">Precio de entrada ($)</label>
@@ -445,7 +445,7 @@
   #panelCalculadora {
     position: fixed;
     top: 0;
-    right: -280px; /* actualizado */
+    right: -320px;
     width: 280px;
     height: 100%;
     background: var(--color-panel);
@@ -563,15 +563,15 @@
   }
 
   .positivo {
-    background-color: #1b5e20;
-    color: #c8e6c9;
-    border: 1px solid #388e3c;
+    background-color: #2e7d32;
+    color: #e8f5e9;
+    border: 1px solid #66bb6a;
   }
 
   .negativo {
-    background-color: #b71c1c;
-    color: #ffcdd2;
-    border: 1px solid #e53935;
+    background-color: #8e1e1e;
+    color: #ffeaea;
+    border: 1px solid #f28b82;
   }
 
   .mensaje-error {
@@ -590,14 +590,14 @@
   const resultado = document.getElementById('resultadoApalancamiento');
 
   btnFlotante.onclick = () => {
-    panel.style.right = '0'; // Pegado al borde derecho
+    panel.style.right = '20px';
     document.addEventListener('click', cerrarPorClickFuera);
   };
 
   cerrar.onclick = cerrarPanel;
 
   function cerrarPanel() {
-    panel.style.right = '-280px'; // se oculta
+    panel.style.right = '-320px';
     resultado.innerHTML = '';
     resultado.className = '';
     resultado.classList.remove('mostrar');
