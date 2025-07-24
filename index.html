@@ -362,7 +362,7 @@
     });
   </script>
 </body>
-  <!-- Botón flotante -->
+<!-- Botón flotante -->
 <button id="btnFlotante" title="Calculadora de Apalancamiento">📈</button>
 
 <!-- Panel lateral con campos flotantes -->
@@ -458,7 +458,7 @@
     font-family: 'Roboto', sans-serif;
     overflow-y: auto;
     border-left: 2px solid #1e1e1e;
-    border-radius: 12px 0 0 12px;
+    border-radius: 0; /* ← sin redondeo para estar completamente pegado */
   }
 
   #panelCalculadora h2 {
@@ -590,7 +590,7 @@
   const resultado = document.getElementById('resultadoApalancamiento');
 
   btnFlotante.onclick = () => {
-    panel.style.right = '20px';
+    panel.style.right = '0px'; // ← ahora se pega totalmente al borde derecho
     document.addEventListener('click', cerrarPorClickFuera);
   };
 
@@ -646,5 +646,6 @@
     resultado.className = `mostrar ${roi >= 0 ? 'positivo' : 'negativo'}`;
   }
 </script>
+
 
 </html>
