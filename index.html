@@ -4,19 +4,39 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Detalle de Interés Compuesto</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+    :root {
+      --bg-color: #0a0a0a;
+      --card-bg: #1c1c1e;
+      --text-color: #e0e0e0;
+      --green: #00ff95;
+      --red: #ff4c4c;
+      --accent: #fbc02d; /* amarillo Binance */
+      --accent-hover: #ffd600;
+      --border-radius: 0.75rem;
+      --shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f4f4f4;
+      font-family: 'Roboto', sans-serif;
+      background: var(--bg-color);
       margin: 0;
       padding: 2rem;
-      color: #333;
+      color: var(--text-color);
     }
 
     h1 {
       text-align: center;
-      color: #4CAF50;
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 2rem;
+      margin-bottom: 2rem;
     }
 
     .formulario {
@@ -24,27 +44,42 @@
       flex-wrap: wrap;
       justify-content: center;
       gap: 1rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
     }
 
-    .formulario input, .formulario select {
-      padding: 0.5rem;
+    .formulario input,
+    .formulario select {
+      background: #1e1e22;
+      color: var(--text-color);
+      border: 1px solid #444;
+      padding: 0.8rem;
       font-size: 1rem;
+      border-radius: var(--border-radius);
       width: 180px;
+      transition: border 0.2s, background 0.2s;
+    }
+
+    .formulario input:focus,
+    .formulario select:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: #26262b;
     }
 
     button {
-      padding: 0.6rem 1.2rem;
+      padding: 0.8rem 1.5rem;
       font-size: 1rem;
-      background-color: #4CAF50;
-      color: white;
+      background-color: var(--accent);
+      color: #000;
+      font-weight: bold;
       border: none;
       cursor: pointer;
-      border-radius: 0.3rem;
+      border-radius: var(--border-radius);
+      transition: background 0.3s;
     }
 
     button:hover {
-      background-color: #45a049;
+      background-color: var(--accent-hover);
     }
 
     .resumen {
@@ -52,6 +87,7 @@
       text-align: center;
       font-size: 1.2rem;
       font-weight: bold;
+      color: var(--text-color);
     }
 
     .detalle-container {
@@ -62,39 +98,54 @@
     }
 
     .detalle-box {
-      background: white;
-      padding: 1rem;
-      border-radius: 0.5rem;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      background: var(--card-bg);
+      padding: 1.2rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
       width: 280px;
-      transition: transform 0.2s;
+      transition: transform 0.2s, box-shadow 0.2s;
+      color: var(--text-color);
+      border: 1px solid #333;
     }
 
     .detalle-box:hover {
-      transform: scale(1.02);
+      transform: scale(1.03);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
     }
 
     .detalle-box p {
-      margin: 0.2rem 0;
+      margin: 0.4rem 0;
     }
 
     .detalle-box input {
-      margin-top: 0.4rem;
+      margin-top: 0.6rem;
       width: 100%;
-      padding: 0.4rem;
+      padding: 0.6rem;
+      background: #1e1e22;
+      color: var(--text-color);
+      border: 1px solid #555;
+      border-radius: 0.4rem;
+      font-size: 0.95rem;
+    }
+
+    .detalle-box input:focus {
+      outline: none;
+      border-color: var(--accent);
     }
 
     .mensaje-diferencia {
       font-size: 0.95rem;
-      margin-top: 0.4rem;
+      margin-top: 0.5rem;
     }
 
     .negativo {
-      color: red;
+      color: var(--red);
+      font-weight: bold;
     }
 
     .positivo {
-      color: green;
+      color: var(--green);
+      font-weight: bold;
     }
 
     .resumen-animado {
@@ -106,27 +157,7 @@
       50% { transform: scale(1.1); }
       100% { transform: scale(1); }
     }
-  
-  .mensaje-diferencia {
-    font-size: 0.95rem;
-    margin-top: 0.4rem;
-    padding: 0.4rem;
-    border-radius: 4px;
-  }
-
-  .mensaje-diferencia.positivo {
-    background-color: #e8f5e9;
-    color: #2e7d32;
-    border: 1px solid #66bb6a;
-  }
-
-  .mensaje-diferencia.negativo {
-    background-color: #ffebee;
-    color: #c62828;
-    border: 1px solid #ef9a9a;
-  }
-
-</style>
+  </style>
 </head>
 <body>
   <h1>Detalle de Interés Compuesto</h1>
@@ -140,7 +171,6 @@
       <option value="$">Dólares ($)</option>
     </select>
     <button onclick="generarDetalle()">Generar Detalle</button>
-    <button onclick="exportarExcel()">Exportar Excel</button>
   </div>
 
   <div class="resumen" id="resumenEstimado">Monto Final Estimado: S/ 0.00</div>
@@ -247,9 +277,7 @@
           datos.inputsData[i] = { estimado, valor: real, diferencia, clase };
         } else {
           mensaje.textContent = '';
-mensaje.className = 'mensaje-diferencia'; // ← elimina clases de color
-datos.inputsData[i] = { estimado, valor: '', diferencia: '', clase: '' };
-
+          datos.inputsData[i] = { estimado, valor: '', diferencia: '', clase: '' };
         }
 
         saldo = estimado;
@@ -280,88 +308,6 @@ datos.inputsData[i] = { estimado, valor: '', diferencia: '', clase: '' };
 
       document.getElementById('contadorResultados').textContent = `Meses Positivos: ${positivos} | Meses Negativos: ${negativos}`;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(datos));
-    }
-
-    function exportarExcel() {
-      const datos = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      if (!datos) {
-        alert("No hay datos para exportar.");
-        return;
-      }
-
-      const detalleBoxes = document.querySelectorAll('.detalle-box');
-      const simbolo = datos.simbolo;
-      const filas = [
-        ["Mes", "Saldo Inicial", "Interés", "Estimado", "Real", "Diferencia", "Porcentaje"]
-      ];
-
-      detalleBoxes.forEach((box, i) => {
-        const saldoInicial = parseFloat(box.querySelector('p:nth-child(2)').textContent.split(": ")[1].replace(simbolo, "").trim());
-        const interes = parseFloat(box.querySelector('p:nth-child(3)').textContent.split(": ")[1].replace(simbolo, "").trim());
-        const estimado = parseFloat(box.querySelector('p:nth-child(4)').textContent.split(": ")[1].replace(simbolo, "").trim());
-        const realInput = box.querySelector('input').value;
-        const real = realInput ? parseFloat(realInput) : null;
-
-        let diferencia = "", porcentaje = "";
-        if (real !== null) {
-          diferencia = real - estimado;
-          porcentaje = (diferencia / estimado) || 0;
-        }
-
-        filas.push([
-          `Mes ${i + 1}`,
-          saldoInicial,
-          interes,
-          estimado,
-          real !== null ? real : "",
-          diferencia !== "" ? diferencia : "",
-          porcentaje !== "" ? porcentaje : ""
-        ]);
-      });
-
-      const ws = XLSX.utils.aoa_to_sheet(filas);
-
-      const currencyFormat = '"'+simbolo+'" #,##0.00';
-      const percentFormat = '0.0%';
-
-      const range = XLSX.utils.decode_range(ws['!ref']);
-      for (let C = range.s.c + 1; C <= range.e.c; ++C) {
-        for (let R = range.s.r + 1; R <= range.e.r; ++R) {
-          const cell_address = { c: C, r: R };
-          const cell_ref = XLSX.utils.encode_cell(cell_address);
-          const cell = ws[cell_ref];
-          if (!cell) continue;
-
-          if ([1,2,3,4,5].includes(C)) {
-            cell.z = currencyFormat;
-            cell.t = "n";
-          } else if (C === 6) {
-            cell.z = percentFormat;
-            cell.t = "n";
-          }
-        }
-      }
-
-      for (let C = 0; C <= 6; C++) {
-        const cell_ref = XLSX.utils.encode_cell({ c: C, r: 0 });
-        if (ws[cell_ref]) {
-          ws[cell_ref].s = { font: { bold: true } };
-        }
-      }
-
-      ws['!cols'] = [
-        { wch: 10 },
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 12 }
-      ];
-
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Detalle");
-      XLSX.writeFile(wb, "detalle_interes_compuesto.xlsx");
     }
 
     window.addEventListener('DOMContentLoaded', () => {
