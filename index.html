@@ -171,6 +171,8 @@
       <option value="$">Dólares ($)</option>
     </select>
     <button onclick="generarDetalle()">Generar Detalle</button>
+    <button onclick="exportarExcel()">Exportar a Excel</button>
+
   </div>
 
   <div class="resumen" id="resumenEstimado">Monto Final Estimado: S/ 0.00</div>
@@ -329,6 +331,107 @@
       }
     });
   </script>
+  <script>
+  function exportarExcel() {
+    const datos = JSON.parse(localStorage.getItem("detalle_interes_compuesto_v2"));
+    if (!datos) {
+      alert("No hay datos para exportar.");
+      return;
+    }
+
+    const { capital, interes, meses, simbolo, inputsData } = datos;
+    const dias = 30;
+    let saldo = capital;
+    let montoFinalEstimado = capital;
+
+    let ultimoReal = 0;
+    let positivos = 0;
+    let negativos = 0;
+
+    for (let i = 0; i < meses; i++) {
+      const interesMensual = montoFinalEstimado * (interes / 100) * dias;
+      montoFinalEstimado += interesMensual;
+
+      const dato = inputsData[i] || {};
+      const real = parseFloat(dato.valor);
+      if (!isNaN(real)) {
+        ultimoReal = real;
+        if (real >= montoFinalEstimado) positivos++;
+        else negativos++;
+      }
+    }
+
+    const wb = XLSX.utils.book_new();
+
+    // HOJA 1: RESUMEN DETALLADO
+    const resumen = [
+      ["Capital Inicial", capital],
+      ["Interés Diario (%)", interes],
+      ["Monto Final Estimado", montoFinalEstimado],
+      ["Monto Real Alcanzado", ultimoReal],
+      ["Número de Meses", meses],
+      ["Meses Positivos / Negativos", `${positivos} / ${negativos}`],
+      ["Moneda", simbolo]
+    ];
+    const wsResumen = XLSX.utils.aoa_to_sheet(resumen);
+
+    // Aplicar formato a celdas monetarias
+    const formatoMoneda = { numFmt: '"' + simbolo + '"#,##0.00' };
+    wsResumen["B1"].z = formatoMoneda.numFmt;
+    wsResumen["B3"].z = formatoMoneda.numFmt;
+    wsResumen["B4"].z = formatoMoneda.numFmt;
+
+    XLSX.utils.book_append_sheet(wb, wsResumen, "Resumen");
+
+    // HOJA 2: DETALLE MENSUAL
+    const detalle = [
+      ["Mes", "Saldo Inicial", "Interés", "Estimado", "Monto Real", "Diferencia", "Diferencia (%)"]
+    ];
+
+    saldo = capital;
+    for (let i = 0; i < meses; i++) {
+      const interesMensual = saldo * (interes / 100) * dias;
+      const estimado = saldo + interesMensual;
+
+      const dato = inputsData[i] || {};
+      const real = parseFloat(dato.valor) || "";
+      const dif = dato.diferencia !== "" ? parseFloat(dato.diferencia) : "";
+      const porcentaje = dato.valor ? (dif / estimado) * 100 : "";
+
+      detalle.push([
+        `Mes ${i + 1}`,
+        saldo,
+        interesMensual,
+        estimado,
+        real !== "" ? real : "",
+        dif !== "" ? dif : "",
+        porcentaje !== "" ? porcentaje / 100 : ""
+      ]);
+
+      saldo = estimado;
+    }
+
+    const wsDetalle = XLSX.utils.aoa_to_sheet(detalle);
+
+    for (let i = 1; i <= detalle.length; i++) {
+      const fila = i;
+      ["B", "C", "D", "E", "F"].forEach(col => {
+        const celda = `${col}${fila}`;
+        if (wsDetalle[celda]) wsDetalle[celda].z = formatoMoneda.numFmt;
+      });
+      const celdaPorc = `G${fila}`;
+      if (wsDetalle[celdaPorc]) wsDetalle[celdaPorc].z = '0.0%';
+    }
+
+    XLSX.utils.book_append_sheet(wb, wsDetalle, "Detalle Mensual");
+
+    XLSX.writeFile(wb, "detalle_interes_compuesto.xlsx");
+  }
+</script>
+
+  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 </body>
 <!-- Botón flotante -->
 <button id="btnFlotante" title="Calculadora de Apalancamiento">📈</button>
