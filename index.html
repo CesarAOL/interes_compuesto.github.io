@@ -708,12 +708,36 @@ box.appendChild(botonRegistro);
 }
 
 .operacion-box {
+  display: flex;
+  flex-wrap: wrap;
   background: #2a2a2a;
   padding: 12px;
   margin-bottom: 10px;
   border-radius: 8px;
   border-left: 4px solid #2196f3;
+  gap: 10px;
+  justify-content: space-between;
 }
+
+.operacion-box label {
+  display: flex;
+  flex-direction: column;
+  width: calc(50% - 10px); /* dos columnas */
+  font-size: 0.85rem;
+}
+
+.operacion-box textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.operacion-box img {
+  max-width: 100px;
+  cursor: pointer;
+  border-radius: 6px;
+  margin-top: 5px;
+}
+
 
 .operacion-box input,
 .operacion-box select,
