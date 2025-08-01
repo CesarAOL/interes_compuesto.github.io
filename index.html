@@ -171,6 +171,7 @@
       <option value="$">Dólares ($)</option>
     </select>
     <button onclick="generarDetalle()">Generar Detalle</button>
+
     <button onclick="exportarExcel()">Exportar a Excel</button>
 
   </div>
@@ -223,6 +224,11 @@
           <input type="number" placeholder="Monto Real a Poner" data-indice="${i}" data-estimado="${estimado}" />
           <div class="mensaje-diferencia"></div>
         `;
+const botonRegistro = document.createElement("button");
+botonRegistro.textContent = "📒 Registro de Operaciones";
+botonRegistro.className = "btn-registro";
+botonRegistro.onclick = () => abrirRegistroOperaciones(i);
+box.appendChild(botonRegistro);
 
         detalleContainer.appendChild(box);
 
@@ -235,8 +241,10 @@
       document.getElementById('contadorResultados').textContent = `Meses Positivos: 0 | Meses Negativos: 0`;
 
       const inputs = document.querySelectorAll('input[data-estimado]');
+
       inputs.forEach(input => {
         input.addEventListener('input', () => actualizarDiferencia(input));
+        
       });
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ capital, interes: interesDiario * 100, meses, simbolo, inputsData }));
@@ -431,8 +439,18 @@
 
   
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- Panel flotante para Registro de Operaciones -->
+<div id="registroOperaciones" class="modal-operaciones">
+  <div class="modal-contenido">
+    <span class="cerrar-modal" onclick="cerrarRegistroOperaciones()">&times;</span>
+    <h3>📋 Registro de Operaciones - Mes <span id="mesOperaciones"></span></h3>
+    <div id="listaOperaciones"></div>
+    <button onclick="agregarOperacion()">➕ Agregar Operación</button>
+  </div>
+</div>
 
 </body>
+
 <!-- Botón flotante -->
 <button id="btnFlotante" title="Calculadora de Apalancamiento">📈</button>
 
@@ -654,6 +672,74 @@
     border: 1px solid #ffeeba;
     font-weight: normal;
   }
+.modal-operaciones {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-contenido {
+  background-color: #1c1c1c;
+  margin: 5% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 90%;
+  max-width: 700px;
+  border-radius: 10px;
+  color: #fff;
+  font-family: 'Roboto', sans-serif;
+  position: relative;
+}
+
+.cerrar-modal {
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  color: #aaa;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.cerrar-modal:hover {
+  color: #fff;
+}
+
+.operacion-box {
+  background: #2a2a2a;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border-left: 4px solid #2196f3;
+}
+
+.operacion-box input,
+.operacion-box select,
+.operacion-box textarea {
+  width: 100%;
+  margin: 5px 0;
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #555;
+  background: #1e1e1e;
+  color: white;
+  font-size: 0.9rem;
+}
+
+.operacion-box textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.operacion-box img {
+  max-width: 100px;
+  cursor: pointer;
+  border-radius: 6px;
+  margin-top: 5px;
+}
+
 </style>
 
 <!-- SCRIPTS -->
@@ -719,6 +805,92 @@
 
     resultado.className = `mostrar ${roi >= 0 ? 'positivo' : 'negativo'}`;
   }
+let operacionesPorMes = {};
+
+function abrirRegistroOperaciones(indiceMes) {
+  const modal = document.getElementById("registroOperaciones");
+  const lista = document.getElementById("listaOperaciones");
+  const mesTexto = document.getElementById("mesOperaciones");
+  mesTexto.textContent = indiceMes + 1;
+
+  modal.style.display = "block";
+  lista.innerHTML = "";
+
+  const operaciones = operacionesPorMes[indiceMes] || [];
+
+  operaciones.forEach((op, idx) => {
+    const div = document.createElement("div");
+    div.className = "operacion-box";
+    div.innerHTML = `
+      <label>Fecha: <input type="date" value="${op.fecha || ""}"></label>
+      <label>Tipo: 
+        <select>
+          <option value="long" ${op.tipo === "long" ? "selected" : ""}>Long 📈</option>
+          <option value="short" ${op.tipo === "short" ? "selected" : ""}>Short 📉</option>
+        </select>
+      </label>
+      <label>Entrada: <input type="number" value="${op.entrada || ""}"></label>
+      <label>Salida: <input type="number" value="${op.salida || ""}"></label>
+      <label>Monto: <input type="number" value="${op.monto || ""}"></label>
+      <label>Apalancamiento: <input type="number" value="${op.apalancamiento || ""}"></label>
+      <label>Resultado: <input type="number" value="${op.resultado || ""}"></label>
+      <label>Liquidado:
+        <select>
+          <option value="sí" ${op.liquidado === "sí" ? "selected" : ""}>Sí</option>
+          <option value="no" ${op.liquidado === "no" ? "selected" : ""}>No</option>
+        </select>
+      </label>
+      <label>Error:
+        <select>
+          <option value="--" ${op.error === "--" ? "selected" : ""}>--</option>
+          <option value="emocional" ${op.error === "emocional" ? "selected" : ""}>Emocional</option>
+          <option value="técnico" ${op.error === "técnico" ? "selected" : ""}>Técnico</option>
+          <option value="gestión" ${op.error === "gestión" ? "selected" : ""}>Gestión</option>
+        </select>
+      </label>
+      <label>Comentario:
+        <textarea>${op.comentario || ""}</textarea>
+      </label>
+      <label>Imagen:
+        <input type="file" accept="image/*" onchange="mostrarImagen(this, ${indiceMes}, ${idx})">
+        ${op.imagen ? `<br><img src="${op.imagen}" onclick="ampliarImagen(this)">` : ""}
+      </label>
+    `;
+    lista.appendChild(div);
+  });
+}
+
+function cerrarRegistroOperaciones() {
+  const modal = document.getElementById("registroOperaciones");
+  modal.style.display = "none";
+}
+
+function agregarOperacion() {
+  const indiceMes = parseInt(document.getElementById("mesOperaciones").textContent) - 1;
+  if (!operacionesPorMes[indiceMes]) {
+    operacionesPorMes[indiceMes] = [];
+  }
+  operacionesPorMes[indiceMes].push({});
+  abrirRegistroOperaciones(indiceMes);
+}
+
+function mostrarImagen(input, mes, idx) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    if (!operacionesPorMes[mes][idx]) operacionesPorMes[mes][idx] = {};
+    operacionesPorMes[mes][idx].imagen = e.target.result;
+    abrirRegistroOperaciones(mes); // Recargar para mostrar la imagen
+  };
+  reader.readAsDataURL(file);
+}
+
+function ampliarImagen(img) {
+  const nuevaVentana = window.open("");
+  nuevaVentana.document.write(`<img src="${img.src}" style="width:100%">`);
+}
+
 </script>
 
 
