@@ -2,920 +2,249 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Detalle de Interés Compuesto</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Interés Compuesto Diario</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-
-    :root {
-      --bg-color: #0a0a0a;
-      --card-bg: #1c1c1e;
-      --text-color: #e0e0e0;
-      --green: #00ff95;
-      --red: #ff4c4c;
-      --accent: #fbc02d; /* amarillo Binance */
-      --accent-hover: #ffd600;
-      --border-radius: 0.75rem;
-      --shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
     body {
-      font-family: 'Roboto', sans-serif;
-      background: var(--bg-color);
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #121212;
+      color: #ffffff;
       margin: 0;
       padding: 2rem;
-      color: var(--text-color);
     }
 
     h1 {
       text-align: center;
-      color: var(--accent);
-      font-weight: 700;
-      font-size: 2rem;
+      color: #00e676;
       margin-bottom: 2rem;
     }
 
     .formulario {
       display: flex;
-      flex-wrap: wrap;
       justify-content: center;
       gap: 1rem;
+      flex-wrap: wrap;
       margin-bottom: 2rem;
     }
 
-    .formulario input,
-    .formulario select {
-      background: #1e1e22;
-      color: var(--text-color);
-      border: 1px solid #444;
+    .formulario input {
       padding: 0.8rem;
-      font-size: 1rem;
-      border-radius: var(--border-radius);
-      width: 180px;
-      transition: border 0.2s, background 0.2s;
-    }
-
-    .formulario input:focus,
-    .formulario select:focus {
-      outline: none;
-      border-color: var(--accent);
-      background: #26262b;
-    }
-
-    button {
-      padding: 0.8rem 1.5rem;
-      font-size: 1rem;
-      background-color: var(--accent);
-      color: #000;
-      font-weight: bold;
       border: none;
+      border-radius: 6px;
+      width: 200px;
+      font-size: 1rem;
+    }
+
+    .formulario button {
+      background-color: #00e676;
+      color: #000;
+      padding: 0.8rem 1.2rem;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
       cursor: pointer;
-      border-radius: var(--border-radius);
-      transition: background 0.3s;
+      font-size: 1rem;
     }
 
-    button:hover {
-      background-color: var(--accent-hover);
+    .formulario button:hover {
+      background-color: #00c853;
     }
 
-    .resumen {
-      margin: 1rem auto;
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: var(--text-color);
-    }
-
-    .detalle-container {
+    .etiquetas {
       display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
       justify-content: center;
+      gap: 3rem;
+      margin: 2rem 0 1rem;
+      flex-wrap: wrap;
     }
 
-    .detalle-box {
-      background: var(--card-bg);
-      padding: 1.2rem;
-      border-radius: var(--border-radius);
-      box-shadow: var(--shadow);
-      width: 280px;
-      transition: transform 0.2s, box-shadow 0.2s;
-      color: var(--text-color);
-      border: 1px solid #333;
-    }
-
-    .detalle-box:hover {
-      transform: scale(1.03);
-      box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
-    }
-
-    .detalle-box p {
-      margin: 0.4rem 0;
-    }
-
-    .detalle-box input {
-      margin-top: 0.6rem;
-      width: 100%;
-      padding: 0.6rem;
-      background: #1e1e22;
-      color: var(--text-color);
-      border: 1px solid #555;
-      border-radius: 0.4rem;
-      font-size: 0.95rem;
-    }
-
-    .detalle-box input:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-
-    .mensaje-diferencia {
-      font-size: 0.95rem;
-      margin-top: 0.5rem;
-    }
-
-    .negativo {
-      color: var(--red);
+    .etiqueta {
+      background-color: #1e1e1e;
+      padding: 1rem 2rem;
+      border-radius: 10px;
+      font-size: 1.4rem;
       font-weight: bold;
+      color: #ffffff;
+      box-shadow: 0 0 10px rgba(0, 230, 118, 0.2);
+      transition: transform 0.3s ease;
+    }
+
+    .etiqueta:hover {
+      transform: scale(1.05);
+    }
+
+    .meta { color: #00e676; }
+    .real { color: #ffcc00; }
+    .dif { color: #ffffff; }
+
+    .positivo-dif { color: #00e676; }
+    .negativo-dif { color: #ff5252; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: center;
+    }
+
+    th {
+      background-color: #1e1e1e;
+      color: #00e676;
+    }
+
+    tr:nth-child(even) {
+      background-color: #1a1a1a;
+    }
+
+    tr:nth-child(odd) {
+      background-color: #222;
+    }
+
+    input.monto-alcanzado, input.deposito-extra {
+      width: 100px;
+      padding: 5px;
+      border-radius: 4px;
+      border: none;
+      background-color: #333;
+      color: #fff;
+      text-align: right;
     }
 
     .positivo {
-      color: var(--green);
-      font-weight: bold;
+      color: #00e676;
     }
 
-    .resumen-animado {
-      animation: pop 0.3s ease-in-out;
-    }
-
-    @keyframes pop {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1); }
+    .negativo {
+      color: #ff5252;
     }
   </style>
 </head>
 <body>
-  <h1>Detalle de Interés Compuesto</h1>
+
+  <h1>Calculadora de Interés Compuesto Diario</h1>
 
   <div class="formulario">
     <input type="number" id="capital" placeholder="Capital Inicial" />
     <input type="number" id="interes" placeholder="Interés Diario (%)" step="0.01" />
-    <input type="number" id="meses" placeholder="Número de Meses" />
-    <select id="moneda">
-      <option value="S/">Soles (S/)</option>
-      <option value="$">Dólares ($)</option>
-    </select>
-    <button onclick="generarDetalle()">Generar Detalle</button>
-
-    <button onclick="exportarExcel()">Exportar a Excel</button>
-
+    <button onclick="generarInteres()">Generar</button>
   </div>
 
-  <div class="resumen" id="resumenEstimado">Monto Final Estimado: S/ 0.00</div>
-  <div class="resumen" id="resumenReal">Monto Real Alcanzado: S/ 0.00</div>
-  <div class="resumen" id="contadorResultados">Meses Positivos: 0 | Meses Negativos: 0</div>
+  <div class="etiquetas">
+    <div class="etiqueta meta">Meta Final:<br><span id="metaFinal">$ 0.00</span></div>
+    <div class="etiqueta real">Monto Real:<br><span id="montoReal">$ 0.00</span></div>
+    <div class="etiqueta dif">Diferencia Total:<br><span id="diferenciaTotal">$ 0.00</span></div>
+  </div>
 
-  <div class="detalle-container" id="detalleContainer"></div>
+  <table id="tablaResultados">
+    <thead>
+      <tr>
+        <th>Mes</th>
+        <th>Saldo Inicial</th>
+        <th>Depósito Extra</th>
+        <th>Interés</th>
+        <th>Estimado</th>
+        <th>Monto Alcanzado</th>
+        <th>Diferencia</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Resultados -->
+    </tbody>
+  </table>
 
   <script>
-    const STORAGE_KEY = "detalle_interes_compuesto_v2";
+    let metaFinalGlobal = 0;
 
-    function formatoMoneda(valor, simbolo) {
-      return `${simbolo} ${valor.toFixed(2)}`;
-    }
-
-    function generarDetalle() {
-      localStorage.removeItem(STORAGE_KEY);
-
-      const capital = parseFloat(document.getElementById('capital').value);
+    function generarInteres() {
+      const capitalInicial = parseFloat(document.getElementById('capital').value);
       const interesDiario = parseFloat(document.getElementById('interes').value) / 100;
-      const meses = parseInt(document.getElementById('meses').value);
-      const simbolo = document.getElementById('moneda').value;
+      const diasPorMes = 30;
+      const tbody = document.querySelector("#tablaResultados tbody");
+      tbody.innerHTML = "";
 
-      if (isNaN(capital) || isNaN(interesDiario) || isNaN(meses)) {
-        alert('Por favor completa todos los campos.');
+      if (isNaN(capitalInicial) || isNaN(interesDiario)) {
+        alert("Por favor, ingresa valores válidos.");
         return;
       }
 
-      const detalleContainer = document.getElementById('detalleContainer');
-      detalleContainer.innerHTML = '';
+      let saldo = capitalInicial;
+      let metaFinal = 0;
 
-      let saldo = capital;
-      const dias = 30;
-      let inputsData = [];
-
-      for (let i = 0; i < meses; i++) {
-        const interesMensual = saldo * interesDiario * dias;
-        const estimado = saldo + interesMensual;
-
-        const box = document.createElement('div');
-        box.className = 'detalle-box';
-
-        box.innerHTML = `
-          <h3>Mes ${i + 1}</h3>
-          <p>Saldo Inicial: ${formatoMoneda(saldo, simbolo)}</p>
-          <p>Interés: ${formatoMoneda(interesMensual, simbolo)}</p>
-          <p>Estimado: ${formatoMoneda(estimado, simbolo)}</p>
-          <input type="number" placeholder="Monto Real a Poner" data-indice="${i}" data-estimado="${estimado}" />
-          <div class="mensaje-diferencia"></div>
+      for (let mes = 1; mes <= 12; mes++) {
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+          <td>Mes ${mes}</td>
+          <td>$ <span class="saldo-inicial">${saldo.toFixed(2)}</span></td>
+          <td><input class="deposito-extra" type="number" data-mes="${mes}" placeholder="$" /></td>
+          <td class="interes">--</td>
+          <td class="estimado">--</td>
+          <td><input class="monto-alcanzado" type="number" data-mes="${mes}" placeholder="$" /></td>
+          <td class="diferencia">--</td>
         `;
-const botonRegistro = document.createElement("button");
-botonRegistro.textContent = "📒 Registro de Operaciones";
-botonRegistro.className = "btn-registro";
-botonRegistro.onclick = () => abrirRegistroOperaciones(i);
-box.appendChild(botonRegistro);
-
-        detalleContainer.appendChild(box);
-
-        inputsData.push({ estimado, valor: '', diferencia: '', clase: '' });
-        saldo = estimado;
+        tbody.appendChild(fila);
+        saldo = saldo * Math.pow(1 + interesDiario, diasPorMes);
+        metaFinal = saldo;
       }
 
-      document.getElementById('resumenEstimado').textContent = `Monto Final Estimado: ${formatoMoneda(saldo, simbolo)}`;
-      document.getElementById('resumenReal').textContent = `Monto Real Alcanzado: ${formatoMoneda(0, simbolo)}`;
-      document.getElementById('contadorResultados').textContent = `Meses Positivos: 0 | Meses Negativos: 0`;
+      metaFinalGlobal = metaFinal;
+      document.getElementById("metaFinal").textContent = `$ ${metaFinal.toFixed(2)}`;
+      recalcularConMontosReales();
 
-      const inputs = document.querySelectorAll('input[data-estimado]');
-
-      inputs.forEach(input => {
-        input.addEventListener('input', () => actualizarDiferencia(input));
-        
+      document.querySelectorAll(".monto-alcanzado, .deposito-extra").forEach(input => {
+        input.addEventListener("input", recalcularConMontosReales);
       });
-
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ capital, interes: interesDiario * 100, meses, simbolo, inputsData }));
     }
 
-    function actualizarDiferencia(input) {
-      const datos = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      const inputs = document.querySelectorAll('input[data-estimado]');
-      const detalleBoxes = document.querySelectorAll('.detalle-box');
+    function recalcularConMontosReales() {
       const interesDiario = parseFloat(document.getElementById('interes').value) / 100;
-      const dias = 30;
-      const simbolo = document.getElementById('moneda').value;
+      const diasPorMes = 30;
+      const filas = document.querySelectorAll("#tablaResultados tbody tr");
+
       let saldo = parseFloat(document.getElementById('capital').value);
+      let sumaReal = 0;
 
-      for (let i = 0; i < inputs.length; i++) {
-        const box = detalleBoxes[i];
-        const inputReal = box.querySelector('input');
-        const mensaje = box.querySelector('.mensaje-diferencia');
+      filas.forEach((fila) => {
+        const inputDeposito = fila.querySelector(".deposito-extra");
+        const deposito = parseFloat(inputDeposito.value) || 0;
+        const saldoInicial = saldo;
+        const saldoConDeposito = saldo + deposito;
 
-        if (i > 0) {
-          const anteriorReal = parseFloat(detalleBoxes[i - 1].querySelector('input').value);
-          if (!isNaN(anteriorReal)) saldo = anteriorReal;
-        }
+        const estimado = saldoConDeposito * Math.pow(1 + interesDiario, diasPorMes);
+        const interes = estimado - saldoConDeposito;
 
-        const interesMensual = saldo * interesDiario * dias;
-        const estimado = saldo + interesMensual;
+        fila.querySelector(".saldo-inicial").textContent = saldoInicial.toFixed(2);
+        fila.querySelector(".interes").textContent = `$ ${interes.toFixed(2)}`;
+        fila.querySelector(".estimado").textContent = `$ ${estimado.toFixed(2)}`;
 
-        box.querySelector('p:nth-child(2)').textContent = `Saldo Inicial: ${formatoMoneda(saldo, simbolo)}`;
-        box.querySelector('p:nth-child(3)').textContent = `Interés: ${formatoMoneda(interesMensual, simbolo)}`;
-        box.querySelector('p:nth-child(4)').textContent = `Estimado: ${formatoMoneda(estimado, simbolo)}`;
-        inputReal.setAttribute('data-estimado', estimado);
-
+        const inputReal = fila.querySelector(".monto-alcanzado");
+        const diferenciaCell = fila.querySelector(".diferencia");
         const real = parseFloat(inputReal.value);
+
         if (!isNaN(real)) {
           const diferencia = real - estimado;
-          const porcentaje = (diferencia / estimado) * 100;
-          const clase = diferencia < 0 ? 'negativo' : 'positivo';
-          mensaje.textContent = `Diferencia: ${formatoMoneda(diferencia, simbolo)} (${porcentaje.toFixed(1)}%)`;
-          mensaje.className = `mensaje-diferencia ${clase}`;
-          datos.inputsData[i] = { estimado, valor: real, diferencia, clase };
+          diferenciaCell.innerHTML = `${diferencia >= 0 ? "+" : ""}$ ${diferencia.toFixed(2)}`;
+          diferenciaCell.className = "diferencia " + (diferencia >= 0 ? "positivo" : "negativo");
+          saldo = real;
+          sumaReal += real;
         } else {
-          mensaje.textContent = '';
-          datos.inputsData[i] = { estimado, valor: '', diferencia: '', clase: '' };
-        }
-
-        saldo = estimado;
-      }
-
-      let ultimoReal = 0;
-      for (let i = inputs.length - 1; i >= 0; i--) {
-        const val = parseFloat(inputs[i].value);
-        if (!isNaN(val)) {
-          ultimoReal = val;
-          break;
-        }
-      }
-
-      document.getElementById('resumenReal').textContent = `Monto Real Alcanzado: ${formatoMoneda(ultimoReal, simbolo)}`;
-      document.getElementById('resumenReal').classList.add('resumen-animado');
-      setTimeout(() => document.getElementById('resumenReal').classList.remove('resumen-animado'), 800);
-
-      let positivos = 0, negativos = 0;
-      inputs.forEach((inp) => {
-        const est = parseFloat(inp.getAttribute('data-estimado'));
-        const val = parseFloat(inp.value);
-        if (!isNaN(val)) {
-          if (val >= est) positivos++;
-          else negativos++;
+          diferenciaCell.innerHTML = "--";
+          diferenciaCell.className = "diferencia";
+          saldo = estimado;
         }
       });
 
-      document.getElementById('contadorResultados').textContent = `Meses Positivos: ${positivos} | Meses Negativos: ${negativos}`;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(datos));
+      document.getElementById("montoReal").textContent = `$ ${sumaReal.toFixed(2)}`;
+      const difTotal = sumaReal - metaFinalGlobal;
+      const difSpan = document.getElementById("diferenciaTotal");
+
+      difSpan.textContent = `${difTotal >= 0 ? "+" : ""}$ ${difTotal.toFixed(2)}`;
+      difSpan.className = difTotal >= 0 ? "positivo-dif" : "negativo-dif";
     }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const datos = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      if (datos) {
-        document.getElementById('capital').value = datos.capital;
-        document.getElementById('interes').value = datos.interes;
-        document.getElementById('meses').value = datos.meses;
-        document.getElementById('moneda').value = datos.simbolo;
-        generarDetalle();
-
-        const inputs = document.querySelectorAll('input[data-estimado]');
-        datos.inputsData.forEach((d, i) => {
-          inputs[i].value = d.valor;
-        });
-        inputs.forEach(input => {
-          input.dispatchEvent(new Event('input'));
-        });
-      }
-    });
   </script>
-  <script>
-  function exportarExcel() {
-    const datos = JSON.parse(localStorage.getItem("detalle_interes_compuesto_v2"));
-    if (!datos) {
-      alert("No hay datos para exportar.");
-      return;
-    }
-
-    const { capital, interes, meses, simbolo, inputsData } = datos;
-    const dias = 30;
-    let saldo = capital;
-    let montoFinalEstimado = capital;
-
-    let ultimoReal = 0;
-    let positivos = 0;
-    let negativos = 0;
-
-    for (let i = 0; i < meses; i++) {
-      const interesMensual = montoFinalEstimado * (interes / 100) * dias;
-      montoFinalEstimado += interesMensual;
-
-      const dato = inputsData[i] || {};
-      const real = parseFloat(dato.valor);
-      if (!isNaN(real)) {
-        ultimoReal = real;
-        if (real >= montoFinalEstimado) positivos++;
-        else negativos++;
-      }
-    }
-
-    const wb = XLSX.utils.book_new();
-
-    // HOJA 1: RESUMEN DETALLADO
-    const resumen = [
-      ["Capital Inicial", capital],
-      ["Interés Diario (%)", interes],
-      ["Monto Final Estimado", montoFinalEstimado],
-      ["Monto Real Alcanzado", ultimoReal],
-      ["Número de Meses", meses],
-      ["Meses Positivos / Negativos", `${positivos} / ${negativos}`],
-      ["Moneda", simbolo]
-    ];
-    const wsResumen = XLSX.utils.aoa_to_sheet(resumen);
-
-    // Aplicar formato a celdas monetarias
-    const formatoMoneda = { numFmt: '"' + simbolo + '"#,##0.00' };
-    wsResumen["B1"].z = formatoMoneda.numFmt;
-    wsResumen["B3"].z = formatoMoneda.numFmt;
-    wsResumen["B4"].z = formatoMoneda.numFmt;
-
-    XLSX.utils.book_append_sheet(wb, wsResumen, "Resumen");
-
-    // HOJA 2: DETALLE MENSUAL
-    const detalle = [
-      ["Mes", "Saldo Inicial", "Interés", "Estimado", "Monto Real", "Diferencia", "Diferencia (%)"]
-    ];
-
-    saldo = capital;
-    for (let i = 0; i < meses; i++) {
-      const interesMensual = saldo * (interes / 100) * dias;
-      const estimado = saldo + interesMensual;
-
-      const dato = inputsData[i] || {};
-      const real = parseFloat(dato.valor) || "";
-      const dif = dato.diferencia !== "" ? parseFloat(dato.diferencia) : "";
-      const porcentaje = dato.valor ? (dif / estimado) * 100 : "";
-
-      detalle.push([
-        `Mes ${i + 1}`,
-        saldo,
-        interesMensual,
-        estimado,
-        real !== "" ? real : "",
-        dif !== "" ? dif : "",
-        porcentaje !== "" ? porcentaje / 100 : ""
-      ]);
-
-      saldo = estimado;
-    }
-
-    const wsDetalle = XLSX.utils.aoa_to_sheet(detalle);
-
-    for (let i = 1; i <= detalle.length; i++) {
-      const fila = i;
-      ["B", "C", "D", "E", "F"].forEach(col => {
-        const celda = `${col}${fila}`;
-        if (wsDetalle[celda]) wsDetalle[celda].z = formatoMoneda.numFmt;
-      });
-      const celdaPorc = `G${fila}`;
-      if (wsDetalle[celdaPorc]) wsDetalle[celdaPorc].z = '0.0%';
-    }
-
-    XLSX.utils.book_append_sheet(wb, wsDetalle, "Detalle Mensual");
-
-    XLSX.writeFile(wb, "detalle_interes_compuesto.xlsx");
-  }
-</script>
-
-  
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<!-- Panel flotante para Registro de Operaciones -->
-<div id="registroOperaciones" class="modal-operaciones">
-  <div class="modal-contenido">
-    <span class="cerrar-modal" onclick="cerrarRegistroOperaciones()">&times;</span>
-    <h3>📋 Registro de Operaciones - Mes <span id="mesOperaciones"></span></h3>
-    <div id="listaOperaciones"></div>
-    <button onclick="agregarOperacion()">➕ Agregar Operación</button>
-  </div>
-</div>
 
 </body>
-
-<!-- Botón flotante -->
-<button id="btnFlotante" title="Calculadora de Apalancamiento">📈</button>
-
-<!-- Panel lateral con campos flotantes -->
-<div id="panelCalculadora">
-  <div id="cerrarPanel">✖</div>
-  <h2>Calculadora Apalancamiento</h2>
-
-  <div class="campo-flotante">
-    <select id="tipoOperacion" required>
-      <option value="long">📈 Long (sube)</option>
-      <option value="short">📉 Short (baja)</option>
-    </select>
-  </div>
-
-  <div class="campo-flotante">
-    <input type="number" id="precioEntrada" required placeholder=" " />
-    <label for="precioEntrada">Precio de entrada ($)</label>
-  </div>
-
-  <div class="campo-flotante">
-    <input type="number" id="montoInvertido" required placeholder=" " />
-    <label for="montoInvertido">Monto invertido ($)</label>
-  </div>
-
-  <div class="campo-flotante">
-    <input type="number" id="apalancamiento" required placeholder=" " />
-    <label for="apalancamiento">Apalancamiento (x)</label>
-  </div>
-
-  <div class="campo-flotante">
-    <input type="number" id="gananciaDeseada" required placeholder=" " />
-    <label for="gananciaDeseada">Ganancia deseada ($)</label>
-  </div>
-
-  <button onclick="calcularSalida()">Calcular</button>
-
-  <div id="resultadoApalancamiento"></div>
-</div>
-
-<!-- ESTILOS -->
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-
-  :root {
-    --color-principal: #0d47a1;
-    --color-verde: #00c853;
-    --color-rojo: #d50000;
-    --color-panel: #121212;
-    --color-texto: #ffffff;
-    --color-input: #1e1e1e;
-    --borde-input: #444;
-    --sombra-suave: 0 6px 20px rgba(0, 0, 0, 0.3);
-  }
-
-  * {
-    box-sizing: border-box;
-  }
-
-  #btnFlotante {
-    position: fixed;
-    bottom: 25px;
-    right: 25px;
-    background: var(--color-principal);
-    color: white;
-    border: none;
-    padding: 1rem;
-    border-radius: 50%;
-    font-size: 1.6rem;
-    cursor: pointer;
-    z-index: 999;
-    box-shadow: var(--sombra-suave);
-    transition: all 0.3s ease;
-  }
-
-  #btnFlotante:hover {
-    transform: scale(1.08);
-    background: #1565c0;
-  }
-
-  #panelCalculadora {
-    position: fixed;
-    top: 0;
-    right: -320px;
-    width: 280px;
-    height: 100%;
-    background: var(--color-panel);
-    color: var(--color-texto);
-    box-shadow: var(--sombra-suave);
-    padding: 1.5rem 1rem;
-    transition: right 0.4s ease;
-    z-index: 998;
-    backdrop-filter: blur(8px);
-    font-family: 'Roboto', sans-serif;
-    overflow-y: auto;
-    border-left: 2px solid #1e1e1e;
-    border-radius: 0; /* ← sin redondeo para estar completamente pegado */
-  }
-
-  #panelCalculadora h2 {
-    margin-top: 0;
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
-    text-align: center;
-    color: #ffffff;
-    border-bottom: 1px solid #333;
-    padding-bottom: 0.4rem;
-  }
-
-  .campo-flotante {
-    position: relative;
-    margin-bottom: 1.3rem;
-  }
-
-  .campo-flotante input,
-  .campo-flotante select {
-    width: 100%;
-    padding: 0.8rem 0.6rem;
-    font-size: 0.95rem;
-    background: var(--color-input);
-    border: 1px solid var(--borde-input);
-    color: white;
-    border-radius: 5px;
-    outline: none;
-    font-family: 'Roboto', sans-serif;
-  }
-
-  .campo-flotante label {
-    position: absolute;
-    top: 50%;
-    left: 0.6rem;
-    transform: translateY(-50%);
-    font-size: 0.9rem;
-    color: #aaa;
-    pointer-events: none;
-    transition: 0.2s ease all;
-    background-color: transparent;
-  }
-
-  .campo-flotante input:focus + label,
-  .campo-flotante input:not(:placeholder-shown) + label,
-  .campo-flotante select:focus + label,
-  .campo-flotante select:valid + label {
-    top: -0.6rem;
-    left: 0.5rem;
-    background-color: var(--color-panel);
-    padding: 0 0.3rem;
-    font-size: 0.7rem;
-    color: #aaa;
-  }
-
-  #panelCalculadora button {
-    background-color: var(--color-principal);
-    border: none;
-    color: white;
-    padding: 0.6rem;
-    width: 100%;
-    font-size: 1rem;
-    margin-top: 0.3rem;
-    cursor: pointer;
-    border-radius: 6px;
-    transition: background 0.3s ease;
-  }
-
-  #panelCalculadora button:hover {
-    background-color: #1976d2;
-  }
-
-  #cerrarPanel {
-    position: absolute;
-    top: 12px;
-    right: 16px;
-    font-size: 1.2rem;
-    cursor: pointer;
-    color: #888;
-    transition: color 0.3s;
-  }
-
-  #cerrarPanel:hover {
-    color: #fff;
-  }
-
-  #resultadoApalancamiento {
-    margin-top: 1rem;
-    padding: 1rem;
-    border-radius: 8px;
-    font-weight: bold;
-    text-align: center;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.4s ease;
-    font-size: 0.95rem;
-    font-family: 'Roboto', sans-serif;
-  }
-
-  #resultadoApalancamiento.mostrar {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-.positivo {
-  color: #00ff95;
-  font-weight: bold;
-  background: none;
-  border: none;
-}
-
-.negativo {
-  color: #ff4c4c;
-  font-weight: bold;
-  background: none;
-  border: none;
-}
-
-
-  .mensaje-error {
-    background-color: #fff3cd;
-    color: #856404;
-    border: 1px solid #ffeeba;
-    font-weight: normal;
-  }
-.modal-operaciones {
-  display: none;
-  position: fixed;
-  z-index: 1000;
-  left: 0; top: 0;
-  width: 100%; height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-}
-
-.modal-contenido {
-  background-color: #1c1c1c;
-  margin: 5% auto;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 90%;
-  max-width: 700px;
-  border-radius: 10px;
-  color: #fff;
-  font-family: 'Roboto', sans-serif;
-  position: relative;
-}
-
-.cerrar-modal {
-  position: absolute;
-  top: 10px;
-  right: 16px;
-  color: #aaa;
-  font-size: 24px;
-  cursor: pointer;
-}
-
-.cerrar-modal:hover {
-  color: #fff;
-}
-
-.operacion-box {
-  display: flex;
-  flex-wrap: wrap;
-  background: #2a2a2a;
-  padding: 12px;
-  margin-bottom: 10px;
-  border-radius: 8px;
-  border-left: 4px solid #2196f3;
-  gap: 10px;
-  justify-content: space-between;
-}
-
-.operacion-box label {
-  display: flex;
-  flex-direction: column;
-  width: calc(50% - 10px); /* dos columnas */
-  font-size: 0.85rem;
-}
-
-.operacion-box textarea {
-  resize: vertical;
-  min-height: 60px;
-}
-
-.operacion-box img {
-  max-width: 100px;
-  cursor: pointer;
-  border-radius: 6px;
-  margin-top: 5px;
-}
-
-
-.operacion-box input,
-.operacion-box select,
-.operacion-box textarea {
-  width: 100%;
-  margin: 5px 0;
-  padding: 8px;
-  border-radius: 5px;
-  border: 1px solid #555;
-  background: #1e1e1e;
-  color: white;
-  font-size: 0.9rem;
-}
-
-.operacion-box textarea {
-  resize: vertical;
-  min-height: 60px;
-}
-
-.operacion-box img {
-  max-width: 100px;
-  cursor: pointer;
-  border-radius: 6px;
-  margin-top: 5px;
-}
-
-</style>
-
-<!-- SCRIPTS -->
-<script>
-  const btnFlotante = document.getElementById('btnFlotante');
-  const panel = document.getElementById('panelCalculadora');
-  const cerrar = document.getElementById('cerrarPanel');
-  const resultado = document.getElementById('resultadoApalancamiento');
-
-  btnFlotante.onclick = () => {
-    panel.style.right = '0px'; // ← ahora se pega totalmente al borde derecho
-    document.addEventListener('click', cerrarPorClickFuera);
-  };
-
-  cerrar.onclick = cerrarPanel;
-
-  function cerrarPanel() {
-    panel.style.right = '-320px';
-    resultado.innerHTML = '';
-    resultado.className = '';
-    resultado.classList.remove('mostrar');
-    document.removeEventListener('click', cerrarPorClickFuera);
-    limpiarCampos();
-  }
-
-  function cerrarPorClickFuera(event) {
-    if (!panel.contains(event.target) && event.target !== btnFlotante) {
-      cerrarPanel();
-    }
-  }
-
-  function limpiarCampos() {
-    document.getElementById('precioEntrada').value = '';
-    document.getElementById('montoInvertido').value = '';
-    document.getElementById('apalancamiento').value = '';
-    document.getElementById('gananciaDeseada').value = '';
-    document.getElementById('tipoOperacion').value = 'long';
-  }
-
-  function calcularSalida() {
-    const tipo = document.getElementById('tipoOperacion').value;
-    const entrada = parseFloat(document.getElementById('precioEntrada').value);
-    const monto = parseFloat(document.getElementById('montoInvertido').value);
-    const apalancamiento = parseFloat(document.getElementById('apalancamiento').value);
-    const ganancia = parseFloat(document.getElementById('gananciaDeseada').value);
-
-    if (isNaN(entrada) || isNaN(monto) || isNaN(apalancamiento) || isNaN(ganancia)) {
-      resultado.innerHTML = "⚠️ Completa todos los campos correctamente.";
-      resultado.className = "mensaje-error mostrar";
-      return;
-    }
-
-    const posicion = monto * apalancamiento;
-    const variacion = (ganancia / posicion) * entrada;
-    const salida = tipo === "long" ? entrada + variacion : entrada - variacion;
-    const roi = (ganancia / monto) * 100;
-
-    resultado.innerHTML = `
-      Tipo: <strong>${tipo === "long" ? "Largo 📈" : "Corto 📉"}</strong><br>
-      Precio de salida:<br><strong>$${salida.toFixed(4)}</strong><br>
-      ROI sobre capital:<br><strong>${roi.toFixed(2)}%</strong>
-    `;
-
-    resultado.className = `mostrar ${roi >= 0 ? 'positivo' : 'negativo'}`;
-  }
-let operacionesPorMes = {};
-
-function abrirRegistroOperaciones(indiceMes) {
-  const modal = document.getElementById("registroOperaciones");
-  const lista = document.getElementById("listaOperaciones");
-  const mesTexto = document.getElementById("mesOperaciones");
-  mesTexto.textContent = indiceMes + 1;
-
-  modal.style.display = "block";
-  lista.innerHTML = "";
-
-  const operaciones = operacionesPorMes[indiceMes] || [];
-
-  operaciones.forEach((op, idx) => {
-    const div = document.createElement("div");
-    div.className = "operacion-box";
-    div.innerHTML = `
-      <label>Fecha: <input type="date" value="${op.fecha || ""}"></label>
-      <label>Tipo: 
-        <select>
-          <option value="long" ${op.tipo === "long" ? "selected" : ""}>Long 📈</option>
-          <option value="short" ${op.tipo === "short" ? "selected" : ""}>Short 📉</option>
-        </select>
-      </label>
-      <label>Entrada: <input type="number" value="${op.entrada || ""}"></label>
-      <label>Salida: <input type="number" value="${op.salida || ""}"></label>
-      <label>Monto: <input type="number" value="${op.monto || ""}"></label>
-      <label>Apalancamiento: <input type="number" value="${op.apalancamiento || ""}"></label>
-      <label>Resultado: <input type="number" value="${op.resultado || ""}"></label>
-      <label>Liquidado:
-        <select>
-          <option value="sí" ${op.liquidado === "sí" ? "selected" : ""}>Sí</option>
-          <option value="no" ${op.liquidado === "no" ? "selected" : ""}>No</option>
-        </select>
-      </label>
-      <label>Error:
-        <select>
-          <option value="--" ${op.error === "--" ? "selected" : ""}>--</option>
-          <option value="emocional" ${op.error === "emocional" ? "selected" : ""}>Emocional</option>
-          <option value="técnico" ${op.error === "técnico" ? "selected" : ""}>Técnico</option>
-          <option value="gestión" ${op.error === "gestión" ? "selected" : ""}>Gestión</option>
-        </select>
-      </label>
-      <label>Comentario:
-        <textarea>${op.comentario || ""}</textarea>
-      </label>
-      <label>Imagen:
-        <input type="file" accept="image/*" onchange="mostrarImagen(this, ${indiceMes}, ${idx})">
-        ${op.imagen ? `<br><img src="${op.imagen}" onclick="ampliarImagen(this)">` : ""}
-      </label>
-    `;
-    lista.appendChild(div);
-  });
-}
-
-function cerrarRegistroOperaciones() {
-  const modal = document.getElementById("registroOperaciones");
-  modal.style.display = "none";
-}
-
-function agregarOperacion() {
-  const indiceMes = parseInt(document.getElementById("mesOperaciones").textContent) - 1;
-  if (!operacionesPorMes[indiceMes]) {
-    operacionesPorMes[indiceMes] = [];
-  }
-  operacionesPorMes[indiceMes].push({});
-  abrirRegistroOperaciones(indiceMes);
-}
-
-function mostrarImagen(input, mes, idx) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function (e) {
-    if (!operacionesPorMes[mes][idx]) operacionesPorMes[mes][idx] = {};
-    operacionesPorMes[mes][idx].imagen = e.target.result;
-    abrirRegistroOperaciones(mes); // Recargar para mostrar la imagen
-  };
-  reader.readAsDataURL(file);
-}
-
-function ampliarImagen(img) {
-  const nuevaVentana = window.open("");
-  nuevaVentana.document.write(`<img src="${img.src}" style="width:100%">`);
-}
-
-</script>
-
-
 </html>
