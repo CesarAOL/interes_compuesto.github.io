@@ -130,6 +130,7 @@
   <div class="formulario">
     <input type="number" id="capital" placeholder="Capital Inicial" />
     <input type="number" id="interes" placeholder="Interés Diario (%)" step="0.01" />
+    <input type="number" id="meses" placeholder="Cantidad de Meses" min="1" />
     <button onclick="generarInteres()">Generar</button>
   </div>
 
@@ -162,11 +163,12 @@
     function generarInteres() {
       const capitalInicial = parseFloat(document.getElementById('capital').value);
       const interesDiario = parseFloat(document.getElementById('interes').value) / 100;
+      const cantidadMeses = parseInt(document.getElementById('meses').value);
       const diasPorMes = 30;
       const tbody = document.querySelector("#tablaResultados tbody");
       tbody.innerHTML = "";
 
-      if (isNaN(capitalInicial) || isNaN(interesDiario)) {
+      if (isNaN(capitalInicial) || isNaN(interesDiario) || isNaN(cantidadMeses)) {
         alert("Por favor, ingresa valores válidos.");
         return;
       }
@@ -174,7 +176,7 @@
       let saldo = capitalInicial;
       let metaFinal = 0;
 
-      for (let mes = 1; mes <= 12; mes++) {
+      for (let mes = 1; mes <= cantidadMeses; mes++) {
         const fila = document.createElement("tr");
         fila.innerHTML = `
           <td>Mes ${mes}</td>
