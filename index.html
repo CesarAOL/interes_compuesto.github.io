@@ -152,15 +152,50 @@
         <th>Diferencia</th>
       </tr>
     </thead>
-    <tbody>
-      <!-- Resultados -->
-    </tbody>
+    <tbody></tbody>
   </table>
 
   <script>
     let metaFinalGlobal = 0;
 
-    function generarInteres() {
+    function guardarDatos() {
+      const capital = document.getElementById("capital").value;
+      const interes = document.getElementById("interes").value;
+      const meses = document.getElementById("meses").value;
+      const datosMeses = [];
+
+      document.querySelectorAll("#tablaResultados tbody tr").forEach((fila, i) => {
+        const monto = fila.querySelector(".monto-alcanzado")?.value || "";
+        const deposito = fila.querySelector(".deposito-extra")?.value || "";
+        datosMeses.push({ monto, deposito });
+      });
+
+      const datos = { capital, interes, meses, datosMeses };
+      localStorage.setItem("datosInteres", JSON.stringify(datos));
+    }
+
+    function cargarDatos() {
+      const datos = JSON.parse(localStorage.getItem("datosInteres"));
+      if (datos) {
+        document.getElementById("capital").value = datos.capital || "";
+        document.getElementById("interes").value = datos.interes || "";
+        document.getElementById("meses").value = datos.meses || "";
+        if (datos.capital && datos.interes && datos.meses) {
+          generarInteres(() => {
+            datos.datosMeses?.forEach((d, i) => {
+              const fila = document.querySelectorAll("#tablaResultados tbody tr")[i];
+              if (fila) {
+                fila.querySelector(".monto-alcanzado").value = d.monto || "";
+                fila.querySelector(".deposito-extra").value = d.deposito || "";
+              }
+            });
+            recalcularConMontosReales();
+          });
+        }
+      }
+    }
+
+    function generarInteres(callback) {
       const capitalInicial = parseFloat(document.getElementById('capital').value);
       const interesDiario = parseFloat(document.getElementById('interes').value) / 100;
       const cantidadMeses = parseInt(document.getElementById('meses').value);
@@ -197,15 +232,20 @@
       recalcularConMontosReales();
 
       document.querySelectorAll(".monto-alcanzado, .deposito-extra").forEach(input => {
-        input.addEventListener("input", recalcularConMontosReales);
+        input.addEventListener("input", () => {
+          recalcularConMontosReales();
+          guardarDatos();
+        });
       });
+
+      guardarDatos();
+      if (callback) callback();
     }
 
     function recalcularConMontosReales() {
       const interesDiario = parseFloat(document.getElementById('interes').value) / 100;
       const diasPorMes = 30;
       const filas = document.querySelectorAll("#tablaResultados tbody tr");
-
       let saldo = parseFloat(document.getElementById('capital').value);
       let sumaReal = 0;
 
@@ -246,6 +286,12 @@
       difSpan.textContent = `${difTotal >= 0 ? "+" : ""}$ ${difTotal.toFixed(2)}`;
       difSpan.className = difTotal >= 0 ? "positivo-dif" : "negativo-dif";
     }
+
+    window.addEventListener("DOMContentLoaded", cargarDatos);
+
+    ["capital", "interes", "meses"].forEach(id => {
+      document.getElementById(id).addEventListener("input", guardarDatos);
+    });
   </script>
 
 </body>
