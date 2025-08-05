@@ -166,6 +166,34 @@
 <script>
 let datosOriginales = [];
 
+window.addEventListener("load", () => {
+  const saved = JSON.parse(localStorage.getItem("simuladorApalancado"));
+  if (saved) {
+    document.getElementById("capital").value = saved.capital || "";
+    document.getElementById("meta").value = saved.meta || "";
+    document.getElementById("ganancia").value = saved.ganancia || "";
+    document.getElementById("apalancamiento").value = saved.apalancamiento || "";
+    if (saved.datosTabla) {
+      document.querySelector("#tabla tbody").innerHTML = saved.datosTabla;
+      datosOriginales = saved.originales || [];
+      const ganancia = parseFloat(saved.ganancia);
+      const apalancamiento = parseFloat(saved.apalancamiento);
+      agregarEventos(ganancia, apalancamiento);
+    }
+  }
+});
+
+function guardarEstado() {
+  localStorage.setItem("simuladorApalancado", JSON.stringify({
+    capital: document.getElementById("capital").value,
+    meta: document.getElementById("meta").value,
+    ganancia: document.getElementById("ganancia").value,
+    apalancamiento: document.getElementById("apalancamiento").value,
+    datosTabla: document.querySelector("#tabla tbody").innerHTML,
+    originales: datosOriginales
+  }));
+}
+
 function calcularLiquidacion(precioEntrada, apalancamiento, tipo) {
   const margen = 1 / apalancamiento;
   const fee = 0.005;
@@ -234,6 +262,7 @@ function simular() {
   }
 
   agregarEventos(gananciaPorcentaje, apalancamiento);
+  guardarEstado();
 }
 
 function agregarEventos(gananciaPorcentaje, apalancamiento) {
@@ -243,56 +272,39 @@ function agregarEventos(gananciaPorcentaje, apalancamiento) {
     const entradaInput = fila.querySelector(".precio-entrada");
     const alcanzadoInput = fila.querySelector(".total-alcanzado");
 
-    tipoSelect.addEventListener("change", () => actualizarPrecios(fila, gananciaPorcentaje, apalancamiento));
-    entradaInput.addEventListener("input", () => actualizarPrecios(fila, gananciaPorcentaje, apalancamiento));
+    const actualizarYGuardar = () => {
+      actualizarPrecios(fila, gananciaPorcentaje, apalancamiento);
+      guardarEstado();
+    };
+
+    tipoSelect.addEventListener("change", actualizarYGuardar);
+    entradaInput.addEventListener("input", actualizarYGuardar);
 
     alcanzadoInput.addEventListener("input", () => {
       const nuevo = parseFloat(alcanzadoInput.value);
       const filasRestantes = Array.from(document.querySelectorAll("#tabla tbody tr")).slice(i + 1);
 
-      if (!isNaN(nuevo)) {
-        let capital = nuevo;
-        for (let j = 0; j < filasRestantes.length; j++) {
-          const filaAct = filasRestantes[j];
-          const ganancia = capital * (gananciaPorcentaje / 100);
-          const total = capital + ganancia;
-          const inversion = capital * apalancamiento;
-          const idx = i + 1 + j;
+      let capital = !isNaN(nuevo) ? nuevo : parseFloat(fila.querySelector(".total-simulado").textContent.replace("$", ""));
+      for (let j = 0; j < filasRestantes.length; j++) {
+        const filaAct = filasRestantes[j];
+        const ganancia = capital * (gananciaPorcentaje / 100);
+        const total = capital + ganancia;
+        const inversion = capital * apalancamiento;
+        const idx = i + 1 + j;
 
-          datosOriginales[idx].capital = capital;
-          datosOriginales[idx].ganancia = ganancia;
-          datosOriginales[idx].total = total;
-          datosOriginales[idx].inversion = inversion;
+        datosOriginales[idx].capital = capital;
+        datosOriginales[idx].ganancia = ganancia;
+        datosOriginales[idx].total = total;
+        datosOriginales[idx].inversion = inversion;
 
-          filaAct.querySelector(".capital").textContent = `$${capital.toFixed(2)}`;
-          filaAct.querySelector(".ganancia").textContent = `$${ganancia.toFixed(2)}`;
-          filaAct.querySelector(".total-simulado").textContent = `$${total.toFixed(2)}`;
-          filaAct.querySelector(".inversion").textContent = `$${inversion.toFixed(2)}`;
-          capital = total;
-        }
-      } else {
-        const anteriorTotal = parseFloat(fila.querySelector(".total-simulado").textContent.replace("$", ""));
-        let capital = anteriorTotal;
-
-        for (let j = 0; j < filasRestantes.length; j++) {
-          const filaAct = filasRestantes[j];
-          const ganancia = capital * (gananciaPorcentaje / 100);
-          const total = capital + ganancia;
-          const inversion = capital * apalancamiento;
-          const idx = i + 1 + j;
-
-          datosOriginales[idx].capital = capital;
-          datosOriginales[idx].ganancia = ganancia;
-          datosOriginales[idx].total = total;
-          datosOriginales[idx].inversion = inversion;
-
-          filaAct.querySelector(".capital").textContent = `$${capital.toFixed(2)}`;
-          filaAct.querySelector(".ganancia").textContent = `$${ganancia.toFixed(2)}`;
-          filaAct.querySelector(".total-simulado").textContent = `$${total.toFixed(2)}`;
-          filaAct.querySelector(".inversion").textContent = `$${inversion.toFixed(2)}`;
-          capital = total;
-        }
+        filaAct.querySelector(".capital").textContent = `$${capital.toFixed(2)}`;
+        filaAct.querySelector(".ganancia").textContent = `$${ganancia.toFixed(2)}`;
+        filaAct.querySelector(".total-simulado").textContent = `$${total.toFixed(2)}`;
+        filaAct.querySelector(".inversion").textContent = `$${inversion.toFixed(2)}`;
+        capital = total;
       }
+
+      guardarEstado();
     });
   });
 }
