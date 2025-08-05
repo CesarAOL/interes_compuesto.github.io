@@ -199,7 +199,7 @@ function simular() {
   tbody.innerHTML = "";
   datosOriginales = [];
 
-  while (capital < meta && fila <= 50) {
+  while (capital < meta) {
     const ganancia = capital * (gananciaPorcentaje / 100);
     const total = capital + ganancia;
     const inversion = capital * apalancamiento;
