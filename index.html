@@ -263,7 +263,9 @@ function agregarEventos(gananciaPorcentaje, apalancamiento) {
       guardarEstado();
     };
 
-    tipoSelect.addEventListener("change", actualizarPrecios);
+    tipoSelect.addEventListener("change", () => {
+      actualizarPrecios();
+    });
     entradaInput.addEventListener("input", actualizarPrecios);
     alcanzadoInput.addEventListener("change", () => {
       const nuevoValor = parseFloat(alcanzadoInput.value);
@@ -288,7 +290,6 @@ function guardarEstado() {
     meta: document.getElementById("meta").value,
     ganancia: document.getElementById("ganancia").value,
     apalancamiento: document.getElementById("apalancamiento").value,
-    cantidadOperaciones: filas.length,
     filas: Array.from(filas).map(fila => ({
       totalAlcanzado: fila.querySelector(".total-alcanzado").value,
       tipo: fila.querySelector(".tipo-op").value,
@@ -310,21 +311,18 @@ function cargarEstado() {
   document.getElementById("ganancia").value = estado.ganancia;
   document.getElementById("apalancamiento").value = estado.apalancamiento;
 
-  let capitalActual = parseFloat(estado.capital);
+  let ultimoCapital = parseFloat(estado.capital);
   let filaInicio = 1;
 
   for (let i = 0; i < estado.filas.length; i++) {
     const fila = estado.filas[i];
-    const alcanzado = parseFloat(fila.totalAlcanzado);
-    if (!isNaN(alcanzado)) {
-      capitalActual = alcanzado;
+    if (fila.totalAlcanzado && !isNaN(parseFloat(fila.totalAlcanzado))) {
+      ultimoCapital = parseFloat(fila.totalAlcanzado);
       filaInicio = i + 2;
-    } else {
-      break;
     }
   }
 
-  simular(capitalActual, 1, estado.cantidadOperaciones);
+  simular(ultimoCapital, filaInicio, estado.filas.length);
 
   estado.filas.forEach((fila, i) => {
     const tr = document.querySelectorAll("#tabla tbody tr")[i];
