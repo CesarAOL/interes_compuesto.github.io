@@ -263,13 +263,19 @@ function agregarEventos(gananciaPorcentaje, apalancamiento) {
       guardarEstado();
     };
 
-    tipoSelect.addEventListener("change", () => {
-      actualizarPrecios();
-    });
-    entradaInput.addEventListener("input", actualizarPrecios);
     alcanzadoInput.addEventListener("change", () => {
-      const nuevoValor = parseFloat(alcanzadoInput.value);
-      const nuevoCapital = !isNaN(nuevoValor) ? nuevoValor : totalSimulado;
+      const valor = parseFloat(alcanzadoInput.value);
+      let nuevoCapital;
+
+      if (!isNaN(valor)) {
+        nuevoCapital = valor;
+      } else if (i > 0) {
+        const anterior = document.querySelectorAll(".total-alcanzado")[i - 1];
+        nuevoCapital = parseFloat(anterior.value) || datosOriginales[i - 1].total;
+        alcanzadoInput.value = "";
+      } else {
+        nuevoCapital = datosOriginales[0].capital;
+      }
 
       actualizarDiferencia();
 
@@ -280,6 +286,9 @@ function agregarEventos(gananciaPorcentaje, apalancamiento) {
 
       simular(nuevoCapital, i + 2);
     });
+
+    tipoSelect.addEventListener("change", actualizarPrecios);
+    entradaInput.addEventListener("input", actualizarPrecios);
   });
 }
 
