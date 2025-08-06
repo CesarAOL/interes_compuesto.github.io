@@ -289,12 +289,13 @@ function guardarEstado() {
   const inputs = document.querySelectorAll("#tabla tbody tr");
   const operaciones = [];
 
-  inputs.forEach((fila, i) => {
+  inputs.forEach((fila) => {
     const totalAlcanzado = fila.querySelector(".total-alcanzado").value || "";
     const tipo = fila.querySelector(".tipo-op").value;
     const entrada = fila.querySelector(".precio-entrada").value || "";
-    const diferencia = fila.querySelector(".diferencia").textContent;
-    operaciones.push({ totalAlcanzado, tipo, entrada, diferencia });
+    const diferencia = fila.querySelector(".diferencia").textContent || "-";
+    const diferenciaClass = fila.querySelector(".diferencia").className;
+    operaciones.push({ totalAlcanzado, tipo, entrada, diferencia, diferenciaClass });
   });
 
   const simulacion = {
@@ -302,7 +303,7 @@ function guardarEstado() {
     meta: document.getElementById("meta").value,
     ganancia: document.getElementById("ganancia").value,
     apalancamiento: document.getElementById("apalancamiento").value,
-    operaciones: operaciones,
+    operaciones,
     numeroOperaciones: operaciones.length
   };
 
@@ -326,23 +327,12 @@ function cargarEstado() {
     const fila = filas[i];
     if (!fila) return;
 
-    if (op.totalAlcanzado) fila.querySelector(".total-alcanzado").value = op.totalAlcanzado;
-    if (op.tipo) fila.querySelector(".tipo-op").value = op.tipo;
-    if (op.entrada) fila.querySelector(".precio-entrada").value = op.entrada;
-    if (op.diferencia) {
-      const celda = fila.querySelector(".diferencia");
-      celda.textContent = op.diferencia;
-      const num = parseFloat(op.diferencia.replace("$", "").replace("+", ""));
-      if (isNaN(num)) {
-        celda.className = "diferencia neutro";
-      } else if (num > 0) {
-        celda.className = "diferencia positivo";
-      } else if (num < 0) {
-        celda.className = "diferencia negativo";
-      } else {
-        celda.className = "diferencia neutro";
-      }
-    }
+    fila.querySelector(".total-alcanzado").value = op.totalAlcanzado;
+    fila.querySelector(".tipo-op").value = op.tipo;
+    fila.querySelector(".precio-entrada").value = op.entrada;
+    const difCell = fila.querySelector(".diferencia");
+    difCell.textContent = op.diferencia || "-";
+    difCell.className = op.diferenciaClass || "diferencia neutro";
   });
 
   agregarEventos(parseFloat(simulacion.ganancia), parseFloat(simulacion.apalancamiento));
