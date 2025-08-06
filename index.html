@@ -147,6 +147,29 @@
 <script>
 let datosOriginales = [];
 
+function guardarEnLocalStorage() {
+  const formData = {
+    capital: document.getElementById("capital").value,
+    meta: document.getElementById("meta").value,
+    ganancia: document.getElementById("ganancia").value,
+    apalancamiento: document.getElementById("apalancamiento").value,
+    tabla: document.getElementById("tabla").innerHTML
+  };
+  localStorage.setItem("simuladorApalancado", JSON.stringify(formData));
+}
+
+function cargarDesdeLocalStorage() {
+  const data = JSON.parse(localStorage.getItem("simuladorApalancado"));
+  if (data) {
+    document.getElementById("capital").value = data.capital;
+    document.getElementById("meta").value = data.meta;
+    document.getElementById("ganancia").value = data.ganancia;
+    document.getElementById("apalancamiento").value = data.apalancamiento;
+    document.getElementById("tabla").innerHTML = data.tabla;
+    agregarEventos(parseFloat(data.ganancia), parseFloat(data.apalancamiento));
+  }
+}
+
 function calcularLiquidacion(precioEntrada, apalancamiento, tipo) {
   const margen = 1 / apalancamiento;
   const fee = 0.005;
@@ -219,6 +242,7 @@ function simular(capitalInicialManual = null, filaInicio = 1) {
   }
 
   agregarEventos(gananciaPorcentaje, apalancamiento);
+  guardarEnLocalStorage();
 }
 
 function agregarEventos(gananciaPorcentaje, apalancamiento) {
@@ -246,6 +270,8 @@ function agregarEventos(gananciaPorcentaje, apalancamiento) {
         salidaCell.textContent = "-";
         liquiCell.textContent = "-";
       }
+
+      guardarEnLocalStorage();
     };
 
     const actualizarDiferencia = () => {
@@ -258,6 +284,7 @@ function agregarEventos(gananciaPorcentaje, apalancamiento) {
       const diff = valor - totalSimulado;
       diferenciaCell.textContent = (diff >= 0 ? "+" : "") + "$" + diff.toFixed(2);
       diferenciaCell.className = "diferencia " + (diff > 0 ? "positivo" : diff < 0 ? "negativo" : "neutro");
+      guardarEnLocalStorage();
     };
 
     tipoSelect.addEventListener("change", actualizarPrecios);
@@ -277,6 +304,8 @@ function agregarEventos(gananciaPorcentaje, apalancamiento) {
     });
   });
 }
+
+window.addEventListener("DOMContentLoaded", cargarDesdeLocalStorage);
 </script>
 
 </body>
