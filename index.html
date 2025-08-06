@@ -163,7 +163,7 @@ function calcularSalida(precioEntrada, apalancamiento, ganancia, tipo) {
     : precioEntrada * (1 - cambio);
 }
 
-function simular(capitalInicialManual = null, filaInicio = 1, limiteOperaciones = null) {
+function simular(capitalInicialManual = null, filaInicio = 1) {
   const capitalInicial = capitalInicialManual ?? parseFloat(document.getElementById("capital").value);
   const meta = parseFloat(document.getElementById("meta").value);
   const gananciaPorcentaje = parseFloat(document.getElementById("ganancia").value);
@@ -183,7 +183,7 @@ function simular(capitalInicialManual = null, filaInicio = 1, limiteOperaciones 
     datosOriginales = [];
   }
 
-  while ((limiteOperaciones ? fila <= limiteOperaciones : capital < meta)) {
+  while (capital < meta) {
     const ganancia = capital * (gananciaPorcentaje / 100);
     const total = capital + ganancia;
     const inversion = capital * apalancamiento;
@@ -263,19 +263,13 @@ function agregarEventos(gananciaPorcentaje, apalancamiento) {
       guardarEstado();
     };
 
+    tipoSelect.addEventListener("change", () => {
+      actualizarPrecios();
+    });
+    entradaInput.addEventListener("input", actualizarPrecios);
     alcanzadoInput.addEventListener("change", () => {
-      const valor = parseFloat(alcanzadoInput.value);
-      let nuevoCapital;
-
-      if (!isNaN(valor)) {
-        nuevoCapital = valor;
-      } else if (i > 0) {
-        const anterior = document.querySelectorAll(".total-alcanzado")[i - 1];
-        nuevoCapital = parseFloat(anterior.value) || datosOriginales[i - 1].total;
-        alcanzadoInput.value = "";
-      } else {
-        nuevoCapital = datosOriginales[0].capital;
-      }
+      const nuevoValor = parseFloat(alcanzadoInput.value);
+      const nuevoCapital = !isNaN(nuevoValor) ? nuevoValor : totalSimulado;
 
       actualizarDiferencia();
 
@@ -286,9 +280,6 @@ function agregarEventos(gananciaPorcentaje, apalancamiento) {
 
       simular(nuevoCapital, i + 2);
     });
-
-    tipoSelect.addEventListener("change", actualizarPrecios);
-    entradaInput.addEventListener("input", actualizarPrecios);
   });
 }
 
@@ -320,18 +311,7 @@ function cargarEstado() {
   document.getElementById("ganancia").value = estado.ganancia;
   document.getElementById("apalancamiento").value = estado.apalancamiento;
 
-  let ultimoCapital = parseFloat(estado.capital);
-  let filaInicio = 1;
-
-  for (let i = 0; i < estado.filas.length; i++) {
-    const fila = estado.filas[i];
-    if (fila.totalAlcanzado && !isNaN(parseFloat(fila.totalAlcanzado))) {
-      ultimoCapital = parseFloat(fila.totalAlcanzado);
-      filaInicio = i + 2;
-    }
-  }
-
-  simular(ultimoCapital, filaInicio, estado.filas.length);
+  simular(parseFloat(estado.capital));
 
   estado.filas.forEach((fila, i) => {
     const tr = document.querySelectorAll("#tabla tbody tr")[i];
