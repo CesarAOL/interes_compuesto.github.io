@@ -34,7 +34,7 @@
       font-weight: 600;
       color: #ccc;
     }
-    input, select {
+    input {
       width: 100%;
       padding: 10px;
       background: #222;
@@ -48,6 +48,11 @@
       max-width: 120px;
       box-sizing: border-box;
       padding: 6px 8px;
+      background: #222;
+      border: 1px solid #333;
+      border-radius: 5px;
+      color: #fff;
+      font-size: 14px;
     }
     button {
       padding: 12px 30px;
@@ -141,49 +146,6 @@
 
 <script>
 let datosOriginales = [];
-
-function guardarEstado() {
-  const estado = {
-    capital: document.getElementById("capital").value,
-    meta: document.getElementById("meta").value,
-    ganancia: document.getElementById("ganancia").value,
-    apalancamiento: document.getElementById("apalancamiento").value,
-    filas: Array.from(document.querySelectorAll("#tabla tbody tr")).map(tr => ({
-      totalAlcanzado: tr.querySelector(".total-alcanzado").value,
-      tipo: tr.querySelector(".tipo-op").value,
-      precioEntrada: tr.querySelector(".precio-entrada").value,
-      precioSalida: tr.querySelector(".precio-salida").textContent,
-      precioLiquidacion: tr.querySelector(".precio-liquidacion").textContent,
-      diferencia: tr.querySelector(".diferencia").textContent,
-      diferenciaClass: tr.querySelector(".diferencia").className
-    }))
-  };
-  localStorage.setItem("simuladorEstado", JSON.stringify(estado));
-}
-
-function cargarEstado() {
-  const estado = JSON.parse(localStorage.getItem("simuladorEstado"));
-  if (!estado) return;
-
-  document.getElementById("capital").value = estado.capital;
-  document.getElementById("meta").value = estado.meta;
-  document.getElementById("ganancia").value = estado.ganancia;
-  document.getElementById("apalancamiento").value = estado.apalancamiento;
-
-  simular();
-  estado.filas.forEach((fila, i) => {
-    const tr = document.querySelectorAll("#tabla tbody tr")[i];
-    if (!tr) return;
-    tr.querySelector(".total-alcanzado").value = fila.totalAlcanzado;
-    tr.querySelector(".tipo-op").value = fila.tipo;
-    tr.querySelector(".precio-entrada").value = fila.precioEntrada;
-    tr.querySelector(".precio-salida").textContent = fila.precioSalida;
-    tr.querySelector(".precio-liquidacion").textContent = fila.precioLiquidacion;
-    const diferencia = tr.querySelector(".diferencia");
-    diferencia.textContent = fila.diferencia;
-    diferencia.className = fila.diferenciaClass;
-  });
-}
 
 function calcularLiquidacion(precioEntrada, apalancamiento, tipo) {
   const margen = 1 / apalancamiento;
@@ -285,7 +247,6 @@ function agregarEventos(gananciaPorcentaje, apalancamiento) {
         salidaCell.textContent = "-";
         liquiCell.textContent = "-";
       }
-
       guardarEstado();
     };
 
@@ -294,15 +255,17 @@ function agregarEventos(gananciaPorcentaje, apalancamiento) {
       if (isNaN(valor)) {
         diferenciaCell.textContent = "-";
         diferenciaCell.className = "diferencia neutro";
-      } else {
-        const diff = valor - totalSimulado;
-        diferenciaCell.textContent = (diff >= 0 ? "+" : "") + "$" + diff.toFixed(2);
-        diferenciaCell.className = "diferencia " + (diff > 0 ? "positivo" : diff < 0 ? "negativo" : "neutro");
+        return;
       }
+      const diff = valor - totalSimulado;
+      diferenciaCell.textContent = (diff >= 0 ? "+" : "") + "$" + diff.toFixed(2);
+      diferenciaCell.className = "diferencia " + (diff > 0 ? "positivo" : diff < 0 ? "negativo" : "neutro");
       guardarEstado();
     };
 
-    tipoSelect.addEventListener("change", actualizarPrecios);
+    tipoSelect.addEventListener("change", () => {
+      actualizarPrecios();
+    });
     entradaInput.addEventListener("input", actualizarPrecios);
     alcanzadoInput.addEventListener("change", () => {
       const nuevoValor = parseFloat(alcanzadoInput.value);
@@ -320,7 +283,66 @@ function agregarEventos(gananciaPorcentaje, apalancamiento) {
   });
 }
 
-window.addEventListener("load", cargarEstado);
+function guardarEstado() {
+  const filas = document.querySelectorAll("#tabla tbody tr");
+  const estado = {
+    capital: document.getElementById("capital").value,
+    meta: document.getElementById("meta").value,
+    ganancia: document.getElementById("ganancia").value,
+    apalancamiento: document.getElementById("apalancamiento").value,
+    filas: Array.from(filas).map(fila => ({
+      totalAlcanzado: fila.querySelector(".total-alcanzado").value,
+      tipo: fila.querySelector(".tipo-op").value,
+      precioEntrada: fila.querySelector(".precio-entrada").value,
+      diferencia: fila.querySelector(".diferencia").textContent,
+      diferenciaClass: fila.querySelector(".diferencia").className
+    }))
+  };
+  localStorage.setItem("estadoSimulador", JSON.stringify(estado));
+}
+
+function cargarEstado() {
+  const guardado = localStorage.getItem("estadoSimulador");
+  if (!guardado) return;
+  const estado = JSON.parse(guardado);
+
+  document.getElementById("capital").value = estado.capital;
+  document.getElementById("meta").value = estado.meta;
+  document.getElementById("ganancia").value = estado.ganancia;
+  document.getElementById("apalancamiento").value = estado.apalancamiento;
+
+  simular(parseFloat(estado.capital));
+
+  estado.filas.forEach((fila, i) => {
+    const tr = document.querySelectorAll("#tabla tbody tr")[i];
+    if (!tr) return;
+
+    tr.querySelector(".total-alcanzado").value = fila.totalAlcanzado;
+    tr.querySelector(".tipo-op").value = fila.tipo;
+    tr.querySelector(".precio-entrada").value = fila.precioEntrada;
+
+    const entrada = parseFloat(fila.precioEntrada);
+    const tipo = fila.tipo;
+    const salidaCell = tr.querySelector(".precio-salida");
+    const liquiCell = tr.querySelector(".precio-liquidacion");
+
+    if (!isNaN(entrada) && entrada > 0) {
+      const salida = calcularSalida(entrada, parseFloat(estado.apalancamiento), parseFloat(estado.ganancia), tipo);
+      const liqui = calcularLiquidacion(entrada, parseFloat(estado.apalancamiento), tipo);
+      salidaCell.textContent = `$${salida.toFixed(4)}`;
+      liquiCell.textContent = `$${liqui.toFixed(4)}`;
+    } else {
+      salidaCell.textContent = "-";
+      liquiCell.textContent = "-";
+    }
+
+    const diferencia = tr.querySelector(".diferencia");
+    diferencia.textContent = fila.diferencia;
+    diferencia.className = fila.diferenciaClass;
+  });
+}
+
+window.onload = cargarEstado;
 </script>
 
 </body>
