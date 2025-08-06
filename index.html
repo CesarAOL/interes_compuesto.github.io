@@ -79,10 +79,13 @@
     th {
       background: #333;
     }
-    tr.highlight {
-      background: #1e1e1e;
-      font-weight: bold;
-    }
+tr.highlight {
+  background: #a3e635 !important;  /* verde lima suave */
+  color: #111 !important;          /* texto oscuro para buen contraste */
+  font-weight: bold;
+  box-shadow: 0 0 6px #a3e63566;   /* sombra suave */
+  transition: background 0.3s ease;
+}
     .diferencia {
       font-weight: bold;
     }
@@ -120,9 +123,28 @@
   </div>
 </div>
 
-<div style="text-align:center;">
-  <button onclick="simular()">Simular</button>
+<!-- Fila horizontal: Totales, Realizadas, Simular -->
+<div style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-top: 30px; flex-wrap: wrap;">
+
+  <!-- Operaciones Totales -->
+  <div style="background: #1e1e1e; padding: 15px 25px; border-radius: 10px; box-shadow: 0 0 8px rgba(255,255,255,0.05); text-align: center; width: 220px;">
+    <div style="font-size: 16px; color: #aaa; margin-bottom: 5px;">Operaciones Totales</div>
+    <div id="contadorTotal" style="font-size: 24px; color: #f5b041; font-weight: bold;">0</div>
+  </div>
+
+  <!-- Operaciones Realizadas -->
+  <div style="background: #1e1e1e; padding: 15px 25px; border-radius: 10px; box-shadow: 0 0 8px rgba(255,255,255,0.05); text-align: center; width: 220px;">
+    <div style="font-size: 16px; color: #aaa; margin-bottom: 5px;">Operaciones Realizadas</div>
+    <div id="contadorRealizadas" style="font-size: 24px; color: #4caf50; font-weight: bold;">0</div>
+  </div>
+
+  <!-- Botón Simular -->
+  <div>
+    <button style="font-size: 17px; padding: 14px 32px;" onclick="simular()">Simular</button>
+  </div>
+
 </div>
+
 
 <table id="tabla">
   <thead>
@@ -213,6 +235,7 @@ function simular(capitalInicialManual = null, filaInicio = 1) {
   }
 
   guardarEstado();
+  actualizarContadores();
 }
 
 function agregarEventos(index, gananciaPorcentaje, apalancamiento) {
@@ -292,6 +315,7 @@ function guardarEstado() {
     }))
   };
   localStorage.setItem("estadoSimulador", JSON.stringify(estado));
+   actualizarContadores();
 }
 
 function cargarEstado() {
@@ -335,6 +359,17 @@ function cargarEstado() {
     fila.querySelector(".tipo-op").value = op.tipo;
     agregarEventos(index, parseFloat(estado.ganancia), parseFloat(estado.apalancamiento));
   });
+ actualizarContadores();
+}
+function actualizarContadores() {
+  const filas = document.querySelectorAll("#tabla tbody tr");
+  const realizadas = Array.from(filas).filter(fila => {
+    const input = fila.querySelector(".total-alcanzado");
+    return input && input.value.trim() !== "";
+  }).length;
+
+  document.getElementById("contadorTotal").textContent = filas.length;
+  document.getElementById("contadorRealizadas").textContent = realizadas;
 }
 
 window.onload = cargarEstado;
