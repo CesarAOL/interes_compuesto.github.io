@@ -43,6 +43,17 @@
       color: #fff;
       font-size: 15px;
     }
+    .auto-input {
+      width: auto;
+      max-width: 120px;
+      box-sizing: border-box;
+      padding: 6px 8px;
+      background: #222;
+      border: 1px solid #333;
+      border-radius: 5px;
+      color: #fff;
+      font-size: 14px;
+    }
     button {
       padding: 12px 30px;
       background: linear-gradient(90deg, #444, #222);
@@ -188,7 +199,7 @@ function simular(capitalInicialManual = null, filaInicio = 1) {
       <td>${gananciaPorcentaje}%</td>
       <td class="ganancia">$${ganancia.toFixed(2)}</td>
       <td class="total-simulado">$${total.toFixed(2)}</td>
-      <td><input class="total-alcanzado" type="number" step="0.01" placeholder="-"></td>
+      <td><input class="auto-input total-alcanzado" type="number" step="0.01" placeholder="-"></td>
       <td class="diferencia neutro">-</td>
       <td class="inversion">$${inversion.toFixed(2)}</td>
       <td>
@@ -197,7 +208,7 @@ function simular(capitalInicialManual = null, filaInicio = 1) {
           <option value="short">Short</option>
         </select>
       </td>
-      <td><input class="precio-entrada" type="number" step="0.0001"></td>
+      <td><input class="auto-input precio-entrada" type="number" step="0.0001" placeholder="Ej: 1.2300"></td>
       <td class="precio-salida">-</td>
       <td class="precio-liquidacion">-</td>
     `;
@@ -257,13 +268,11 @@ function agregarEventos(gananciaPorcentaje, apalancamiento) {
 
       actualizarDiferencia();
 
-      // Elimina filas siguientes
       const tbody = document.querySelector("#tabla tbody");
       const siguientes = Array.from(tbody.querySelectorAll("tr")).slice(i + 1);
       siguientes.forEach(tr => tr.remove());
       datosOriginales.splice(i + 1);
 
-      // Vuelve a simular desde el nuevo capital
       simular(nuevoCapital, i + 2);
     });
   });
