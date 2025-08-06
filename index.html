@@ -95,12 +95,6 @@
     .neutro {
       color: #aaa;
     }
-    #contador-operaciones {
-      font-size: 18px;
-      margin-top: 4px;
-      font-weight: bold;
-      color: #f5b041;
-    }
   </style>
 </head>
 <body>
@@ -111,8 +105,6 @@
   <div class="form-group">
     <label for="capital">Capital Inicial ($):</label>
     <input type="number" id="capital" placeholder="Ej: 100">
-    <label>Operaciones:</label>
-    <div id="contador-operaciones">0 / 0</div>
   </div>
   <div class="form-group">
     <label for="meta">Meta Final ($):</label>
@@ -226,7 +218,6 @@ function simular(capitalInicialManual = null, filaInicio = 1) {
     capital = total;
   }
 
-  document.getElementById("contador-operaciones").textContent = `${fila - 1} / ${fila - 1}`;
   agregarEventos(gananciaPorcentaje, apalancamiento);
   guardarEstado();
 }
@@ -272,7 +263,9 @@ function agregarEventos(gananciaPorcentaje, apalancamiento) {
       guardarEstado();
     };
 
-    tipoSelect.addEventListener("change", actualizarPrecios);
+    tipoSelect.addEventListener("change", () => {
+      actualizarPrecios();
+    });
     entradaInput.addEventListener("input", actualizarPrecios);
     alcanzadoInput.addEventListener("change", () => {
       const nuevoValor = parseFloat(alcanzadoInput.value);
@@ -297,7 +290,6 @@ function guardarEstado() {
     meta: document.getElementById("meta").value,
     ganancia: document.getElementById("ganancia").value,
     apalancamiento: document.getElementById("apalancamiento").value,
-    totalOperaciones: filas.length,
     filas: Array.from(filas).map(fila => ({
       totalAlcanzado: fila.querySelector(".total-alcanzado").value,
       tipo: fila.querySelector(".tipo-op").value,
@@ -318,7 +310,6 @@ function cargarEstado() {
   document.getElementById("meta").value = estado.meta;
   document.getElementById("ganancia").value = estado.ganancia;
   document.getElementById("apalancamiento").value = estado.apalancamiento;
-  document.getElementById("contador-operaciones").textContent = `${estado.totalOperaciones} / ${estado.totalOperaciones}`;
 
   simular(parseFloat(estado.capital));
 
