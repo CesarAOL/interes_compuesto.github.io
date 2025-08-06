@@ -163,7 +163,7 @@ function calcularSalida(precioEntrada, apalancamiento, ganancia, tipo) {
     : precioEntrada * (1 - cambio);
 }
 
-function simular(capitalInicialManual = null, filaInicio = 1) {
+function simular(capitalInicialManual = null, filaInicio = 1, limiteOperaciones = null) {
   const capitalInicial = capitalInicialManual ?? parseFloat(document.getElementById("capital").value);
   const meta = parseFloat(document.getElementById("meta").value);
   const gananciaPorcentaje = parseFloat(document.getElementById("ganancia").value);
@@ -183,7 +183,7 @@ function simular(capitalInicialManual = null, filaInicio = 1) {
     datosOriginales = [];
   }
 
-  while (capital < meta) {
+  while ((limiteOperaciones ? fila <= limiteOperaciones : capital < meta)) {
     const ganancia = capital * (gananciaPorcentaje / 100);
     const total = capital + ganancia;
     const inversion = capital * apalancamiento;
@@ -290,6 +290,7 @@ function guardarEstado() {
     meta: document.getElementById("meta").value,
     ganancia: document.getElementById("ganancia").value,
     apalancamiento: document.getElementById("apalancamiento").value,
+    cantidadOperaciones: filas.length,
     filas: Array.from(filas).map(fila => ({
       totalAlcanzado: fila.querySelector(".total-alcanzado").value,
       tipo: fila.querySelector(".tipo-op").value,
@@ -311,7 +312,7 @@ function cargarEstado() {
   document.getElementById("ganancia").value = estado.ganancia;
   document.getElementById("apalancamiento").value = estado.apalancamiento;
 
-  simular(parseFloat(estado.capital));
+  simular(parseFloat(estado.capital), 1, estado.cantidadOperaciones);
 
   estado.filas.forEach((fila, i) => {
     const tr = document.querySelectorAll("#tabla tbody tr")[i];
