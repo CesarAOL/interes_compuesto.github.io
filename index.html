@@ -34,7 +34,7 @@
       font-weight: 600;
       color: #ccc;
     }
-    input {
+    input, select {
       width: 100%;
       padding: 10px;
       background: #222;
@@ -48,11 +48,6 @@
       max-width: 120px;
       box-sizing: border-box;
       padding: 6px 8px;
-      background: #222;
-      border: 1px solid #333;
-      border-radius: 5px;
-      color: #fff;
-      font-size: 14px;
     }
     button {
       padding: 12px 30px;
@@ -147,6 +142,49 @@
 <script>
 let datosOriginales = [];
 
+function guardarEstado() {
+  const estado = {
+    capital: document.getElementById("capital").value,
+    meta: document.getElementById("meta").value,
+    ganancia: document.getElementById("ganancia").value,
+    apalancamiento: document.getElementById("apalancamiento").value,
+    filas: Array.from(document.querySelectorAll("#tabla tbody tr")).map(tr => ({
+      totalAlcanzado: tr.querySelector(".total-alcanzado").value,
+      tipo: tr.querySelector(".tipo-op").value,
+      precioEntrada: tr.querySelector(".precio-entrada").value,
+      precioSalida: tr.querySelector(".precio-salida").textContent,
+      precioLiquidacion: tr.querySelector(".precio-liquidacion").textContent,
+      diferencia: tr.querySelector(".diferencia").textContent,
+      diferenciaClass: tr.querySelector(".diferencia").className
+    }))
+  };
+  localStorage.setItem("simuladorEstado", JSON.stringify(estado));
+}
+
+function cargarEstado() {
+  const estado = JSON.parse(localStorage.getItem("simuladorEstado"));
+  if (!estado) return;
+
+  document.getElementById("capital").value = estado.capital;
+  document.getElementById("meta").value = estado.meta;
+  document.getElementById("ganancia").value = estado.ganancia;
+  document.getElementById("apalancamiento").value = estado.apalancamiento;
+
+  simular();
+  estado.filas.forEach((fila, i) => {
+    const tr = document.querySelectorAll("#tabla tbody tr")[i];
+    if (!tr) return;
+    tr.querySelector(".total-alcanzado").value = fila.totalAlcanzado;
+    tr.querySelector(".tipo-op").value = fila.tipo;
+    tr.querySelector(".precio-entrada").value = fila.precioEntrada;
+    tr.querySelector(".precio-salida").textContent = fila.precioSalida;
+    tr.querySelector(".precio-liquidacion").textContent = fila.precioLiquidacion;
+    const diferencia = tr.querySelector(".diferencia");
+    diferencia.textContent = fila.diferencia;
+    diferencia.className = fila.diferenciaClass;
+  });
+}
+
 function calcularLiquidacion(precioEntrada, apalancamiento, tipo) {
   const margen = 1 / apalancamiento;
   const fee = 0.005;
@@ -163,7 +201,7 @@ function calcularSalida(precioEntrada, apalancamiento, ganancia, tipo) {
     : precioEntrada * (1 - cambio);
 }
 
-function simular(capitalInicialManual = null, filaInicio = 1, maxOperaciones = null) {
+function simular(capitalInicialManual = null, filaInicio = 1) {
   const capitalInicial = capitalInicialManual ?? parseFloat(document.getElementById("capital").value);
   const meta = parseFloat(document.getElementById("meta").value);
   const gananciaPorcentaje = parseFloat(document.getElementById("ganancia").value);
@@ -183,7 +221,7 @@ function simular(capitalInicialManual = null, filaInicio = 1, maxOperaciones = n
     datosOriginales = [];
   }
 
-  while (capital < meta && (!maxOperaciones || fila - 1 < maxOperaciones)) {
+  while (capital < meta) {
     const ganancia = capital * (gananciaPorcentaje / 100);
     const total = capital + ganancia;
     const inversion = capital * apalancamiento;
@@ -247,6 +285,7 @@ function agregarEventos(gananciaPorcentaje, apalancamiento) {
         salidaCell.textContent = "-";
         liquiCell.textContent = "-";
       }
+
       guardarEstado();
     };
 
@@ -263,17 +302,13 @@ function agregarEventos(gananciaPorcentaje, apalancamiento) {
       guardarEstado();
     };
 
-    tipoSelect.addEventListener("change", () => {
-      actualizarPrecios();
-    });
-    entradaInput.addEventListener("input", () => {
-      actualizarPrecios();
-    });
+    tipoSelect.addEventListener("change", actualizarPrecios);
+    entradaInput.addEventListener("input", actualizarPrecios);
     alcanzadoInput.addEventListener("change", () => {
-      actualizarDiferencia();
-
       const nuevoValor = parseFloat(alcanzadoInput.value);
       const nuevoCapital = !isNaN(nuevoValor) ? nuevoValor : totalSimulado;
+
+      actualizarDiferencia();
 
       const tbody = document.querySelector("#tabla tbody");
       const siguientes = Array.from(tbody.querySelectorAll("tr")).slice(i + 1);
@@ -283,59 +318,6 @@ function agregarEventos(gananciaPorcentaje, apalancamiento) {
       simular(nuevoCapital, i + 2);
     });
   });
-}
-
-function guardarEstado() {
-  const inputs = document.querySelectorAll("#tabla tbody tr");
-  const operaciones = [];
-
-  inputs.forEach((fila) => {
-    const totalAlcanzado = fila.querySelector(".total-alcanzado").value || "";
-    const tipo = fila.querySelector(".tipo-op").value;
-    const entrada = fila.querySelector(".precio-entrada").value || "";
-    const diferencia = fila.querySelector(".diferencia").textContent || "-";
-    const diferenciaClass = fila.querySelector(".diferencia").className;
-    operaciones.push({ totalAlcanzado, tipo, entrada, diferencia, diferenciaClass });
-  });
-
-  const simulacion = {
-    capital: document.getElementById("capital").value,
-    meta: document.getElementById("meta").value,
-    ganancia: document.getElementById("ganancia").value,
-    apalancamiento: document.getElementById("apalancamiento").value,
-    operaciones,
-    numeroOperaciones: operaciones.length
-  };
-
-  localStorage.setItem("simuladorApalancado", JSON.stringify(simulacion));
-}
-
-function cargarEstado() {
-  const data = localStorage.getItem("simuladorApalancado");
-  if (!data) return;
-
-  const simulacion = JSON.parse(data);
-  document.getElementById("capital").value = simulacion.capital;
-  document.getElementById("meta").value = simulacion.meta;
-  document.getElementById("ganancia").value = simulacion.ganancia;
-  document.getElementById("apalancamiento").value = simulacion.apalancamiento;
-
-  simular(parseFloat(simulacion.capital), 1, simulacion.numeroOperaciones);
-
-  const filas = document.querySelectorAll("#tabla tbody tr");
-  simulacion.operaciones.forEach((op, i) => {
-    const fila = filas[i];
-    if (!fila) return;
-
-    fila.querySelector(".total-alcanzado").value = op.totalAlcanzado;
-    fila.querySelector(".tipo-op").value = op.tipo;
-    fila.querySelector(".precio-entrada").value = op.entrada;
-    const difCell = fila.querySelector(".diferencia");
-    difCell.textContent = op.diferencia || "-";
-    difCell.className = op.diferenciaClass || "diferencia neutro";
-  });
-
-  agregarEventos(parseFloat(simulacion.ganancia), parseFloat(simulacion.apalancamiento));
 }
 
 window.addEventListener("load", cargarEstado);
