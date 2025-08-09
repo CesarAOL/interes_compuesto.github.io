@@ -382,15 +382,20 @@ function actualizarContadores() {
   document.getElementById("contadorTotal").textContent = `${total} (Faltan: ${faltan})`;
   document.getElementById("contadorRealizadas").textContent = realizadas;
 
-  // Calcular la suma de "Total Alcanzado"
-  let suma = 0;
-  filas.forEach(fila => {
-    const val = parseFloat(fila.querySelector(".total-alcanzado").value);
-    if (!isNaN(val)) suma += val;
-  });
+  // Obtener el último valor ingresado de "Total Alcanzado"
+  let ultimoValor = null;
+  for (let i = filas.length - 1; i >= 0; i--) {
+    const val = parseFloat(filas[i].querySelector(".total-alcanzado").value);
+    if (!isNaN(val)) {
+      ultimoValor = val;
+      break;
+    }
+  }
 
-  document.getElementById("totalAlcanzadoSum").textContent = `$${suma.toFixed(2)}`;
+  document.getElementById("totalAlcanzadoSum").textContent = 
+    ultimoValor !== null ? `$${ultimoValor.toFixed(2)}` : "$0.00";
 }
+
 
 window.onload = cargarEstado;
 </script>
