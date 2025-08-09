@@ -130,6 +130,11 @@ tr.highlight {
   <div style="font-size: 16px; color: #aaa; margin-bottom: 5px;">Total Alcanzado ($)</div>
   <div id="totalAlcanzadoSum" style="font-size: 24px; color: #f5b041; font-weight: bold;">$0.00</div>
 </div>
+<!-- Ganancia/Pérdida Acumulada -->
+<div style="background: #1e1e1e; padding: 15px 25px; border-radius: 10px; box-shadow: 0 0 8px rgba(255,255,255,0.05); text-align: center; width: 220px;">
+  <div style="font-size: 16px; color: #aaa; margin-bottom: 5px;">Ganancia/Pérdida Acumulada ($)</div>
+  <div id="gananciaAcumulada" style="font-size: 24px; font-weight: bold;">$0.00</div>
+</div>
 
 <!-- Operaciones Totales -->
 <div style="background: #1e1e1e; padding: 15px 25px; border-radius: 10px; box-shadow: 0 0 8px rgba(255,255,255,0.05); text-align: center; width: 220px;">
@@ -392,8 +397,24 @@ function actualizarContadores() {
     }
   }
 
+  // Actualizar Total Alcanzado
   document.getElementById("totalAlcanzadoSum").textContent = 
     ultimoValor !== null ? `$${ultimoValor.toFixed(2)}` : "$0.00";
+
+  // Calcular Ganancia/Pérdida Acumulada
+  const capitalInicial = parseFloat(document.getElementById("capital").value);
+  let gananciaPerdida = 0;
+  let colorTexto = "#aaa"; // neutro
+
+  if (!isNaN(capitalInicial) && ultimoValor !== null) {
+    gananciaPerdida = ultimoValor - capitalInicial;
+    if (gananciaPerdida > 0) colorTexto = "#4caf50"; // verde
+    else if (gananciaPerdida < 0) colorTexto = "#e74c3c"; // rojo
+  }
+
+  const gpElem = document.getElementById("gananciaAcumulada");
+  gpElem.textContent = `${gananciaPerdida >= 0 ? "+" : ""}$${gananciaPerdida.toFixed(2)}`;
+  gpElem.style.color = colorTexto;
 }
 
 
